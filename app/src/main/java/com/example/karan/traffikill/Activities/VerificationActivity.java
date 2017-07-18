@@ -5,12 +5,11 @@ import android.os.Bundle;
 
 import com.example.karan.traffikill.R;
 
-public class FirstLaunch extends AppCompatActivity {
+public class VerificationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_first_launch);
-
+        setContentView(R.layout.activity_verification);
     }
 }

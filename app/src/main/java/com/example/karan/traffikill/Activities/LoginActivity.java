@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.R;
+import com.example.karan.traffikill.models.FacebookUser;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -25,9 +26,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
+    protected FirebaseDatabase firebaseDatabase;
     CallbackManager callbackManager;
     LoginButton fbloginButton;
     TextView btnSignUp;
@@ -42,10 +50,22 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         UserScreen.userAuthentication = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
         fbloginButton = (LoginButton) findViewById(R.id.fb_login_button);
         btnSignUp = (TextView) findViewById(R.id.tv_signup);
+
+        //Email or Phone Signup Method
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
+            }
+        });
+
+        //Facebook Login Method
+        fbloginButton.setReadPermissions(Arrays.asList("user_profile", "public_profile", "email"));
         fbloginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -71,16 +91,19 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void saveFacebookLoginData(String facebook, String token) {
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
+    private void handleFacebookAccessToken(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         UserScreen.userAuthentication.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -88,6 +111,19 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithCredential:success");
                             UserScreen.currentUser = UserScreen.userAuthentication.getCurrentUser();
+                            Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
+                            firebaseDatabase = FirebaseDatabase.getInstance();
+                            DatabaseReference ref = firebaseDatabase.getReference("https://crafty-router-159106.firebaseio.com/");
+                            DatabaseReference usersRef = ref.child("users");
+                            Map<String, FacebookUser> users = new HashMap<>();
+                            users.put(UserScreen.currentUser.getUid(), new FacebookUser(UserScreen.currentUser.getDisplayName()));
+                            if (usersRef.child(UserScreen.currentUser.getUid()) == null) {
+                                usersRef.setValue(users);
+                            } else {
+                                Toast.makeText(LoginActivity.this, "You have already registered with TraffiKill",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            startActivity(new Intent(LoginActivity.this, UserScreen.class));
                         } else {
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",

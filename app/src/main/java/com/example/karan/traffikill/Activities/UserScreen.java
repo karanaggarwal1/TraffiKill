@@ -31,6 +31,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.IOException;
 
@@ -46,11 +47,11 @@ public class UserScreen extends AppCompatActivity
     private static AppStart appStart = null;
     protected UserDetails currentUserDetails;
     SharedPreferences checkFirstTimeStart;
+    protected static FirebaseDatabase firebaseDatabase;
 
     @Override
     protected void onStart() {
         super.onStart();
-
         currentUser = userAuthentication.getCurrentUser();
     }
 
@@ -141,7 +142,7 @@ public class UserScreen extends AppCompatActivity
             int currentVersionCode = pInfo.versionCode;
             appStart = checkAppStart(currentVersionCode, lastVersionCode);
             sharedPreferences.edit()
-                    .putInt(LAST_APP_VERSION, currentVersionCode).commit();
+                    .putInt(LAST_APP_VERSION, currentVersionCode).apply();
         } catch (PackageManager.NameNotFoundException e) {
             Log.d("TraffiKill",
                     "Unable to determine current app version from package manager. Defensively assuming normal app start.");
@@ -223,7 +224,7 @@ public class UserScreen extends AppCompatActivity
     }
 
     public enum AppStart {
-        FIRST_TIME, FIRST_TIME_VERSION, NORMAL;
+        FIRST_TIME, FIRST_TIME_VERSION, NORMAL
     }
 
 }
