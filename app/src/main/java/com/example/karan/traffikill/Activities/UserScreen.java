@@ -5,35 +5,27 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapRegionDecoder;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.karan.traffikill.R;
-
 import com.example.karan.traffikill.models.UserDetails;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.IOException;
+import com.squareup.picasso.Picasso;
 
 
 public class UserScreen extends AppCompatActivity
@@ -41,13 +33,14 @@ public class UserScreen extends AppCompatActivity
     public static final int NEW_VERSION = 123;
     public static final int NEW_USER = 234;
     private static final String LAST_APP_VERSION = "1";
-    private static final String TAG = "TraffiKill";
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
     private static AppStart appStart = null;
     protected UserDetails currentUserDetails;
     SharedPreferences checkFirstTimeStart;
-    protected static FirebaseDatabase firebaseDatabase;
+    private ImageView profileImage;
+    private TextView displayName;
+    private TextView displayMail;
 
     @Override
     protected void onStart() {
@@ -62,6 +55,11 @@ public class UserScreen extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        NavigationView InavigationView = (NavigationView) findViewById(R.id.nav_view);
+        View hView = InavigationView.getHeaderView(0);
+        profileImage = (ImageView) (hView.findViewById(R.id.iv_profile_pic));
+        displayName = (TextView) (hView.findViewById(R.id.tvName));
+        displayMail = (TextView) (hView.findViewById(R.id.email));
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -117,17 +115,19 @@ public class UserScreen extends AppCompatActivity
         //to check if email address is valid or not
         //Get useful data to set up user profile
         currentUserDetails = new UserDetails(currentUser.getDisplayName(), currentUser.getEmail(), currentUser.getPhotoUrl());
+        if (currentUserDetails.getName() != null) {
+            displayName.setText(currentUserDetails.getName());
+        }
         if (currentUserDetails.getImageURL() != null) {
-            try {
-                ((ImageView) findViewById(R.id.iv_profile_pic)).setImageBitmap(
-                        MediaStore.Images.Media.getBitmap(this.getContentResolver(),
-                                currentUserDetails.getImageURL()));
-            } catch (IOException e) {
-                Toast.makeText(this, "Unable to render profile image", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            }
-        } else {
-            Log.i(TAG, "No profile Image set by the User");
+            Picasso.with(getApplicationContext())
+                    .load(currentUserDetails.getImageURL())
+                    .placeholder(R.drawable.com_facebook_profile_picture_blank_square)
+                    .resize(200, 200)
+                    .centerCrop()
+                    .into(profileImage);
+        }
+        if (currentUserDetails.getEmail() != null) {
+            displayMail.setText(currentUserDetails.getEmail());
         }
     }
 
