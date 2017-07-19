@@ -4,8 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,10 +35,13 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
+    private static boolean flag = true,flagPhone=false;
     protected FirebaseDatabase firebaseDatabase;
     CallbackManager callbackManager;
     LoginButton fbloginButton;
-    TextView btnSignUp;
+    TextView btnSignUp, tvSignInWithPhoneNumber;
+    Button btnSignIn;
+    EditText etUsername, etPassword;
 
     @Override
     protected void onStart() {
@@ -45,10 +51,28 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //TODO: add a google+ sign up method
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        etUsername = (EditText) findViewById(R.id.tvUsername);
+        etPassword = (EditText) findViewById(R.id.etPassword);
+        btnSignIn = (Button) findViewById(R.id.btnSignIn);
+        tvSignInWithPhoneNumber = (TextView) findViewById(R.id.tvsignInWithPhoneNumber);
+
+        if (getIntent() != null) {
+            if (getIntent().getStringExtra("email") != null) {
+                etUsername.setText(getIntent().getStringExtra("email"));
+            }
+            if (getIntent().getStringExtra("password") != null) {
+                etPassword.setText(getIntent().getStringExtra("password"));
+            }
+        }
+
         UserScreen.userAuthentication = FirebaseAuth.getInstance();
+        if (UserScreen.currentUser != null) {
+            UserScreen.userAuthentication.signOut();
+        }
         if (UserScreen.userAuthentication.getCurrentUser() != null) {
             startActivity(new Intent(this, UserScreen.class));
         }
@@ -89,9 +113,43 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(signUp);
             }
         });
+        //Email login method
+        btnSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(flag){
+                    //normal sign in
+                }
+                else{
+                    //phone number sign in
+                }
+            }
+        });
+        tvSignInWithPhoneNumber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (flag) {
+                    flag = false;
+                    changeUIElements("normal");
+                } else {
+                    flag = true;
+                    changeUIElements("phone");
+                }
+            }
+        });
     }
 
-    private void saveFacebookLoginData(String facebook, String token) {
+    public void changeUIElements(String type) {
+        if (type.equals("normal")) {
+            tvSignInWithPhoneNumber.setText("Sign in with Phone Number Instead");
+            etUsername.setInputType(InputType.TYPE_CLASS_TEXT);
+            etPassword.setVisibility(View.VISIBLE);
+        } else {
+            tvSignInWithPhoneNumber.setText("Sign in with Email Address Instead");
+            etUsername.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_PHONE);
+            etPassword.setVisibility(View.INVISIBLE);
+
+        }
     }
 
     @Override

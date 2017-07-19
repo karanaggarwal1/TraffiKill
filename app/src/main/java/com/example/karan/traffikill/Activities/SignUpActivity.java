@@ -1,10 +1,9 @@
 package com.example.karan.traffikill.Activities;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
@@ -67,21 +66,26 @@ public class SignUpActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent outgoingIntent = new Intent(SignUpActivity.this, VerificationActivity.class);
+                Intent outgoingIntent;
                 if (isValidEmail(etPhoneEmail.getText())) {
-                    outgoingIntent.putExtra("type","email");
+                    outgoingIntent = new Intent(SignUpActivity.this, VerificationEmail.class);
+                    outgoingIntent.putExtra("type", "email");
                     outgoingIntent.putExtra("email", etPhoneEmail.getText().toString());
-                } else if (isValidMobile(etPhoneEmail.getText())){
-                    outgoingIntent.putExtra("type","phone");
-                    outgoingIntent.putExtra("phone",String.valueOf(etPhoneEmail.getText().toString()));
-                }
-                else{
-                    Toast.makeText(SignUpActivity.this,"Please enter valid Email/Phone Number",Toast.LENGTH_SHORT).show();
+                } else if (isValidMobile(etPhoneEmail.getText())) {
+                    outgoingIntent = new Intent(SignUpActivity.this, VerificationPhone.class);
+                    outgoingIntent.putExtra("type", "phone");
+                    outgoingIntent.putExtra("phone", String.valueOf(etPhoneEmail.getText().toString()));
+                } else {
+                    Toast.makeText(SignUpActivity.this, "Please enter valid Email/Phone Number", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                startActivity(outgoingIntent);
+
+                if (outgoingIntent != null) {
+                    startActivity(outgoingIntent);
+                }
             }
         });
+
     }
 
     private boolean isValidMobile(CharSequence phone) {

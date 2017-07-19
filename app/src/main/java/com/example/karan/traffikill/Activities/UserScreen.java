@@ -95,25 +95,22 @@ public class UserScreen extends AppCompatActivity
             default:
                 break;
         }
-        //start code for established user
-        //get user data
-        //start using firebase database for storing data
-        //three possible cases, launched app but user is signed out,
-        //never made an account but launched the app before
-        //the user is signed in
+        /*start code for established user
+        get user data
+        start using firebase database for storing data
+        three possible cases, launched app but user is signed out,
+        never made an account but launched the app before
+        the user is signed in*/
         userAuthentication = FirebaseAuth.getInstance();
         if (currentUser == null) {
             //redirect user to login screen
-            //TODO:user has logged out or never made an account
             //show login Activity
             Intent loginScreen = new Intent(this, LoginActivity.class);
             startActivity(loginScreen);
             finish();
         }
-        //setup User UI details
-        //Patterns.EMAIL_ADDRESS.matcher(email).matches()
-        //to check if email address is valid or not
-        //Get useful data to set up user profile
+        /*setup User UI details
+        Get useful data to set up user profile*/
         currentUserDetails = new UserDetails(currentUser.getDisplayName(), currentUser.getEmail(), currentUser.getPhotoUrl());
         if (currentUserDetails.getName() != null) {
             displayName.setText(currentUserDetails.getName());
@@ -128,12 +125,14 @@ public class UserScreen extends AppCompatActivity
         }
         if (currentUserDetails.getEmail() != null) {
             displayMail.setText(currentUserDetails.getEmail());
+        } else {
+            //in case the user has signed up with Phone Number instead of Email Address
+            displayMail.setText("");
         }
     }
 
     public AppStart checkAppStart(Context context, SharedPreferences sharedPreferences) {
         PackageInfo pInfo;
-
         try {
             pInfo = context.getPackageManager().getPackageInfo(
                     context.getPackageName(), 0);
@@ -205,7 +204,7 @@ public class UserScreen extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -217,7 +216,6 @@ public class UserScreen extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
