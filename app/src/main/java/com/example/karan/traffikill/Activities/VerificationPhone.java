@@ -1,9 +1,15 @@
 package com.example.karan.traffikill.Activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -33,6 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class VerificationPhone extends AppCompatActivity {
 
     private static final String TAG = "VerificationPhone";
+    private final int PERM_REQ_CODE = 123;
     protected TextView PhoneNumberField;
     protected Button btnVerify;
     protected EditText etCode;
@@ -48,6 +55,9 @@ public class VerificationPhone extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verification_phone);
+
+        checkPermission(this, Manifest.permission.INTERNET);
+
         userAuthentification = FirebaseAuth.getInstance();
         PhoneNumberField = (TextView) findViewById(R.id.tvStatus);
         etCode = (EditText) findViewById(R.id.etCode);
@@ -164,7 +174,7 @@ public class VerificationPhone extends AppCompatActivity {
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                             DatabaseReference databaseReference = firebaseDatabase.getReference();
                             databaseReference.child("users").setValue(currentUser.getUid(), currentUser.getPhoneNumber());
-                            databaseReference.child("users").child(currentUser.getUid()).setValue("provider","phone");
+                            databaseReference.child("users").child(currentUser.getUid()).setValue("provider", "phone");
                         } else {
                             Log.d(TAG, "signInWithCredential:failure", task.getException());
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
@@ -173,6 +183,16 @@ public class VerificationPhone extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    public void checkPermission(Context context, String perm) {
+        //TODO: Implement a permission driven interface in other activities as well
+        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
+            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

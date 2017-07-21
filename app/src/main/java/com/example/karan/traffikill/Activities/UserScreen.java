@@ -1,14 +1,19 @@
 package com.example.karan.traffikill.Activities;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.models.UserDetails;
@@ -36,11 +42,13 @@ public class UserScreen extends AppCompatActivity
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
     private static AppStart appStart = null;
+    public final int PERM_REQ_CODE = 123;
     protected UserDetails currentUserDetails;
     SharedPreferences checkFirstTimeStart;
     private ImageView profileImage;
     private TextView displayName;
     private TextView displayMail;
+    private boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onStart() {
@@ -48,10 +56,15 @@ public class UserScreen extends AppCompatActivity
         currentUser = userAuthentication.getCurrentUser();
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.user_screen);
+
+        checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        checkPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        checkPermission(this, Manifest.permission.INTERNET);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -165,14 +178,39 @@ public class UserScreen extends AppCompatActivity
         }
     }
 
+    public void checkPermission(Context context, String perm) {
+        //TODO: Implement a permission driven interface in other activities as well
+        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
+            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (!drawer.isDrawerOpen(GravityCompat.START)) {
             super.onBackPressed();
         }
+        if (doubleBackToExitPressedOnce) {
+            android.os.Process.killProcess(android.os.Process.myPid());
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
 
     @Override

@@ -1,8 +1,14 @@
 package com.example.karan.traffikill.Activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class VerificationEmail extends AppCompatActivity {
+    private final int PERM_REQ_CODE = 123;
     Intent incomingIntent;
     EditText etEmail, etName, etPassword, etConfirmPassword;
     TextView tvSamePasswords;
@@ -30,10 +37,23 @@ public class VerificationEmail extends AppCompatActivity {
     private FirebaseAuth userAuthentication;
     private FirebaseUser currentUser;
 
+    public void checkPermission(Context context, String perm) {
+        //TODO: Implement a permission driven interface in other activities as well
+        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
+            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verification_email);
+
+        checkPermission(this, Manifest.permission.INTERNET);
+
         userAuthentication = FirebaseAuth.getInstance();
         incomingIntent = getIntent();
         if (incomingIntent.getStringExtra("type").equals("email")) {

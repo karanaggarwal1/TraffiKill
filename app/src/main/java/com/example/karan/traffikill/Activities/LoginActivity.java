@@ -1,8 +1,14 @@
 package com.example.karan.traffikill.Activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
@@ -36,6 +42,7 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static boolean flag = true, flagPhone = false;
+    private final int PERM_REQ_CODE = 123;
     protected FirebaseDatabase firebaseDatabase;
     CallbackManager callbackManager;
     LoginButton fbloginButton;
@@ -54,6 +61,8 @@ public class LoginActivity extends AppCompatActivity {
         //TODO: add a google+ sign up method
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        checkPermission(this, Manifest.permission.INTERNET);
 
         etUsername = (EditText) findViewById(R.id.tvUsername);
         etPassword = (EditText) findViewById(R.id.tvPassword);
@@ -152,6 +161,16 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    public void checkPermission(Context context, String perm) {
+        //TODO: Implement a permission driven interface in other activities as well
+        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
+            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void changeUIElements(String type) {

@@ -1,7 +1,13 @@
 package com.example.karan.traffikill.Activities;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
@@ -21,6 +27,7 @@ public class SignUpActivity extends AppCompatActivity {
     Intent incomingIntent;
     String type;
     private TextView tvInformation;
+    private final int PERM_REQ_CODE=123;
 
     public static boolean isValidEmail(CharSequence target) {
         if (target == null) {
@@ -30,10 +37,22 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    public void checkPermission(Context context, String perm) {
+        //TODO: Implement a permission driven interface in other activities as well
+        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
+            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
+        checkPermission(this, Manifest.permission.INTERNET);
 
         etPhoneEmail = (EditText) findViewById(R.id.et_phone_email);
         tvLogIn = (TextView) findViewById(R.id.tvLogIn);
