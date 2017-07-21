@@ -32,7 +32,7 @@
             android:layout_below="@+id/imageView"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="25dp"
-            android:text="Enter Email or Phone Number"
+            android:text="Enter Email Address"
             android:textAllCaps="true"
             android:textColor="@android:color/black"
             android:textSize="16sp"/>
@@ -48,8 +48,9 @@
             android:layout_marginTop="33dp"
             android:ems="15"
             android:paddingStart="10dp"
-            android:hint="Email or Phone Number"
-            android:inputType="textPersonName" />
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="10dp" />
 
         <Button
             android:id="@+id/btnNext"

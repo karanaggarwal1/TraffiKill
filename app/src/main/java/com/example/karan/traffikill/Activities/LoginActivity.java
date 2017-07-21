@@ -35,7 +35,7 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
-    private static boolean flag = true,flagPhone=false;
+    private static boolean flag = true, flagPhone = false;
     protected FirebaseDatabase firebaseDatabase;
     CallbackManager callbackManager;
     LoginButton fbloginButton;
@@ -56,7 +56,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         etUsername = (EditText) findViewById(R.id.tvUsername);
-        etPassword = (EditText) findViewById(R.id.etPassword);
+        etPassword = (EditText) findViewById(R.id.tvPassword);
+
         btnSignIn = (Button) findViewById(R.id.btnSignIn);
         tvSignInWithPhoneNumber = (TextView) findViewById(R.id.tvsignInWithPhoneNumber);
 
@@ -110,6 +111,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent signUp = new Intent(LoginActivity.this, SignUpActivity.class);
+                signUp.putExtra("type", "email");
                 startActivity(signUp);
             }
         });
@@ -117,11 +119,24 @@ public class LoginActivity extends AppCompatActivity {
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(flag){
-                    //normal sign in
-                }
-                else{
-                    //phone number sign in
+                if (flag) {
+                    if (UserScreen.userAuthentication.getCurrentUser() != null) {
+                        UserScreen.userAuthentication.signOut();
+                        UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
+                                etPassword.getText().toString());
+                    } else {
+                        UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
+                                etPassword.getText().toString());
+                    }
+                } else {
+                    if (UserScreen.userAuthentication.getCurrentUser() != null) {
+                        UserScreen.userAuthentication.signOut();
+                        Intent launchPhoneSignIn = new Intent(LoginActivity.this, SignUpActivity.class);
+                        launchPhoneSignIn.putExtra("type", "phone");
+                        startActivity(launchPhoneSignIn);
+                    } else {
+
+                    }
                 }
             }
         });
@@ -144,11 +159,12 @@ public class LoginActivity extends AppCompatActivity {
             tvSignInWithPhoneNumber.setText("Sign in with Phone Number Instead");
             etUsername.setInputType(InputType.TYPE_CLASS_TEXT);
             etPassword.setVisibility(View.VISIBLE);
+            etUsername.setHint("Username");
         } else {
             tvSignInWithPhoneNumber.setText("Sign in with Email Address Instead");
             etUsername.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_PHONE);
             etPassword.setVisibility(View.INVISIBLE);
-
+            etUsername.setHint("Phone Number");
         }
     }
 

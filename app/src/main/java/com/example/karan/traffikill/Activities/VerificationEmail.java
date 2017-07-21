@@ -19,6 +19,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class VerificationEmail extends AppCompatActivity {
     Intent incomingIntent;
@@ -63,6 +65,12 @@ public class VerificationEmail extends AppCompatActivity {
                         HideViewProperties(tvSamePasswords);
                         etConfirmPassword.setEnabled(true);
                     }
+                    if (s.toString().equals(etPassword.getText().toString())) {
+                        HideViewProperties(tvSamePasswords);
+                    }
+                    if (!tvSamePasswords.isEnabled()) {
+                        btnSubmit.setEnabled(true);
+                    }
                 }
             });
             etConfirmPassword.addTextChangedListener(new TextWatcher() {
@@ -81,14 +89,15 @@ public class VerificationEmail extends AppCompatActivity {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    if (s.toString() == etPassword.getText().toString()) {
+                    if (s.toString().equals(etPassword.getText().toString())) {
                         HideViewProperties(tvSamePasswords);
+                    }
+                    if (!tvSamePasswords.isEnabled()) {
+                        btnSubmit.setEnabled(true);
                     }
                 }
             });
-            if (!tvSamePasswords.isEnabled()) {
-                btnSubmit.setEnabled(true);
-            }
+
             btnSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -98,8 +107,30 @@ public class VerificationEmail extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 currentUser = userAuthentication.getCurrentUser();
+                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                DatabaseReference databaseReference = firebaseDatabase.getReference();
+                                databaseReference.child("users").setValue(currentUser.getUid(), currentUser.getEmail());
+                                databaseReference.child("users").child(currentUser.getUid()).
+                                        setValue("provider", "email");
+                                databaseReference.child("users").child(currentUser.getUid()).
+                                        setValue("name", etName.getText().toString());
+                                currentUser.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(VerificationEmail.this,
+                                                    "Verification Email sent to " + currentUser.getEmail(),
+                                                    Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(VerificationEmail.this,
+                                                    "Failed to send verification email.",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                                 Intent outgoingIntent = new Intent(VerificationEmail.this, LoginActivity.class);
                                 outgoingIntent.putExtra("email", currentUser.getEmail());
+                                outgoingIntent.putExtra("name", etName.getText().toString());
                                 outgoingIntent.putExtra("password", etPassword.getText().toString());
                                 startActivity(outgoingIntent);
                             } else {
@@ -118,7 +149,7 @@ public class VerificationEmail extends AppCompatActivity {
             findViewById(R.id.tvLogIn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivity(new Intent(VerificationEmail.this,LoginActivity.class));
+                    startActivity(new Intent(VerificationEmail.this, LoginActivity.class));
                 }
             });
         } else {

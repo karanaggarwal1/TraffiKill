@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +18,9 @@ public class SignUpActivity extends AppCompatActivity {
     EditText etPhoneEmail;
     Button btnRegister;
     TextView tvLogIn;
+    Intent incomingIntent;
+    String type;
+    private TextView tvInformation;
 
     public static boolean isValidEmail(CharSequence target) {
         if (target == null) {
@@ -34,7 +38,20 @@ public class SignUpActivity extends AppCompatActivity {
         etPhoneEmail = (EditText) findViewById(R.id.et_phone_email);
         tvLogIn = (TextView) findViewById(R.id.tvLogIn);
         btnRegister = (Button) findViewById(R.id.btnNext);
+        tvInformation = (TextView) findViewById(R.id.tvInformation);
 
+        incomingIntent = getIntent();
+        type = getIntent().getStringExtra("type");
+
+        if (type.equals("email")) {
+            tvInformation.setText("Enter Email Address");
+            etPhoneEmail.setHint("Email Address");
+            etPhoneEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        } else if (type.equals("phone")) {
+            tvInformation.setText("Enter Phone Number");
+            etPhoneEmail.setHint("Phone Number");
+            etPhoneEmail.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_CLASS_PHONE);
+        }
         etPhoneEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -66,18 +83,26 @@ public class SignUpActivity extends AppCompatActivity {
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent outgoingIntent;
-                if (isValidEmail(etPhoneEmail.getText())) {
-                    outgoingIntent = new Intent(SignUpActivity.this, VerificationEmail.class);
-                    outgoingIntent.putExtra("type", "email");
-                    outgoingIntent.putExtra("email", etPhoneEmail.getText().toString());
-                } else if (isValidMobile(etPhoneEmail.getText())) {
-                    outgoingIntent = new Intent(SignUpActivity.this, VerificationPhone.class);
-                    outgoingIntent.putExtra("type", "phone");
-                    outgoingIntent.putExtra("phone", String.valueOf(etPhoneEmail.getText().toString()));
-                } else {
-                    Toast.makeText(SignUpActivity.this, "Please enter valid Email/Phone Number", Toast.LENGTH_SHORT).show();
-                    return;
+                Intent outgoingIntent = null;
+                if (type.equals("email")) {
+                    if (isValidEmail(etPhoneEmail.getText())) {
+                        outgoingIntent = new Intent(SignUpActivity.this, VerificationEmail.class);
+                        outgoingIntent.putExtra("type", "email");
+                        outgoingIntent.putExtra("email", etPhoneEmail.getText().toString());
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Please enter valid Email/Phone Number", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } else if (type.equals("phone")) {
+
+                    if (isValidMobile(etPhoneEmail.getText())) {
+                        outgoingIntent = new Intent(SignUpActivity.this, VerificationPhone.class);
+                        outgoingIntent.putExtra("type", "phone");
+                        outgoingIntent.putExtra("phone", String.valueOf(etPhoneEmail.getText().toString()));
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Please enter valid Email/Phone Number", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }
 
                 if (outgoingIntent != null) {
