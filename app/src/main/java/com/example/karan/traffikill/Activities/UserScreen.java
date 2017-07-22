@@ -36,7 +36,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.R;
+import com.example.karan.traffikill.Services.WeatherAPI;
+import com.example.karan.traffikill.models.CurrentData;
+import com.example.karan.traffikill.models.KeyListDaily;
+import com.example.karan.traffikill.models.KeyListHourly;
 import com.example.karan.traffikill.models.UserDetails;
+import com.example.karan.traffikill.models.WeatherInfo;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -57,7 +62,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class UserScreen extends AppCompatActivity
@@ -107,6 +117,11 @@ public class UserScreen extends AppCompatActivity
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
 
+    public WeatherAPI weatherAPI;
+
+    private ArrayList<CurrentData> mCurrentData;
+    private ArrayList<KeyListHourly> mHourlyData;
+    private ArrayList<KeyListDaily> mDailyData;
     @Override
     protected void onStart() {
         super.onStart();
@@ -208,6 +223,8 @@ public class UserScreen extends AppCompatActivity
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
 
+        if(savedInstanceState!=null)
+
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -221,7 +238,20 @@ public class UserScreen extends AppCompatActivity
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
                 Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLatitude() + "::" + mCurrentLocation.getLongitude());
-                //Get request to Dark Sky API will be made here, each time the location is changed
+                //Get request to Dark Sky API will be made here, every time the location is changed
+                weatherAPI.getWeatherClient().getWeatherInfo().enqueue(new Callback<WeatherInfo>() {
+                    @Override
+                    public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
+                        for(CurrentData currentData:response.body().getCurrently()){
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<WeatherInfo> call, Throwable t) {
+
+                    }
+                });
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             }
         };
