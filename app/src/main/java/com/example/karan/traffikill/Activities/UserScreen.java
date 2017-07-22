@@ -73,8 +73,8 @@ public class UserScreen extends AppCompatActivity
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     private final static String KEY_LOCATION = "location";
     private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 15000;
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 150000;
     private static final String TAG = "LocationUpdates";
 
     //Firebase Authentication
@@ -106,7 +106,6 @@ public class UserScreen extends AppCompatActivity
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
-    private Location currentLocation;
 
     @Override
     protected void onStart() {
@@ -212,6 +211,7 @@ public class UserScreen extends AppCompatActivity
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+
     }
 
     private void createLocationCallback() {
@@ -220,7 +220,8 @@ public class UserScreen extends AppCompatActivity
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
-                Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLongitude() + "::" + mCurrentLocation.getLatitude());
+                Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLatitude() + "::" + mCurrentLocation.getLongitude());
+                //Get request to Dark Sky API will be made here, each time the location is changed
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             }
         };
