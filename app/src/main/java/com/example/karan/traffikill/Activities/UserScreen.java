@@ -245,28 +245,23 @@ public class UserScreen extends AppCompatActivity
                 //Get request to Dark Sky API will be made here, every time the location is changed
                 weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()).
                         enqueue(new Callback<WeatherInfo>() {
-                    @Override
-                    public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
-                        for (CurrentData currentData : response.body().getCurrently()) {
-                            UserScreen.this.mCurrentData.add(currentData);
-                            Log.d(TAG, "onResponse: " + currentData.getSummary());
-                        }
-                        for (KeyListHourly hourlyData : response.body().getHourly()) {
-                            UserScreen.this.mHourlyData.add(hourlyData);
-                            Log.d(TAG, "onResponse: " + hourlyData.getSummary());
-                        }
-                        for (KeyListDaily dailyData : response.body().getDaily()) {
-                            UserScreen.this.mDailyData.add(dailyData);
-                            Log.d(TAG, "onResponse: " + dailyData.getSummary());
-                        }
-                    }
+                            @Override
+                            public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
+                                Log.d(TAG, "onResponse: " + response.isSuccessful());
+                                UserScreen.this.mCurrentData.add(response.body().getCurrently());
+                                Log.d(TAG, "onResponse: " + response.body().getCurrently().getSummary());
+                                UserScreen.this.mHourlyData.add(response.body().getHourly());
+                                Log.d(TAG, "onResponse: " + response.body().getHourly().getSummary());
+                                UserScreen.this.mDailyData.add(response.body().getDaily());
+                                Log.d(TAG, "onResponse: " + response.body().getDaily().getSummary());
+                            }
 
-                    //
-                    @Override
-                    public void onFailure(Call<WeatherInfo> call, Throwable t) {
-
-                    }
-                });
+                            @Override
+                            public void onFailure(Call<WeatherInfo> call, Throwable t) {
+                                Log.d(TAG, "onFailure: " + call.isCanceled());
+                                Log.d(TAG, "onFailure: " + t.getCause());
+                            }
+                        });
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                 Log.d(TAG, "onLocationResult: " + mLastUpdateTime);
             }

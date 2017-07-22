@@ -6,8 +6,6 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
-
 /**
  * Created by Karan on 22-07-2017.
  */
@@ -26,31 +24,31 @@ public class WeatherInfo implements Parcelable {
 
     @SerializedName("currently")
     @Expose
-    ArrayList<CurrentData> currently;
+    CurrentData currently;
 
     @SerializedName("hourly")
     @Expose
-    ArrayList<KeyListHourly> hourly;
+    KeyListHourly hourly;
 
     @SerializedName("daily")
     @Expose
-    ArrayList<KeyListDaily> daily;
+    KeyListDaily daily;
 
     public WeatherInfo(Parcel parcel) {
-        parcel.readTypedList(this.currently, CurrentData.CREATOR);
-        parcel.readTypedList(this.hourly, KeyListHourly.CREATOR);
-        parcel.readTypedList(this.daily, KeyListDaily.CREATOR);
+        parcel.readParcelable(CurrentData.class.getClassLoader());
+        parcel.readParcelable(KeyListHourly.class.getClassLoader());
+        parcel.readParcelable(KeyListDaily.class.getClassLoader());
     }
 
-    public ArrayList<CurrentData> getCurrently() {
+    public CurrentData getCurrently() {
         return currently;
     }
 
-    public ArrayList<KeyListHourly> getHourly() {
+    public KeyListHourly getHourly() {
         return hourly;
     }
 
-    public ArrayList<KeyListDaily> getDaily() {
+    public KeyListDaily getDaily() {
         return daily;
     }
 
@@ -61,8 +59,8 @@ public class WeatherInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeTypedList(this.currently);
-        dest.writeTypedList(this.hourly);
-        dest.writeTypedList(this.daily);
+        dest.writeParcelable(this.currently, flags);
+        dest.writeParcelable(this.hourly, flags);
+        dest.writeParcelable(this.daily, flags);
     }
 }
