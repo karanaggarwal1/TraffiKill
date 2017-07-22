@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -93,22 +94,18 @@ public class UserScreen extends AppCompatActivity
 
     //checking AppStart mode
     private static AppStart appStart = null;
+    public WeatherAPI weatherAPI;
     protected UserDetails currentUserDetails;
     SharedPreferences checkFirstTimeStart;
-
     //UI elements.
     private ImageView profileImage;
     private TextView displayName;
     private TextView displayMail;
-
     private boolean doubleBackToExitPressedOnce = false;
-
     //status check if location updates are turned on or not
-    private boolean mRequestingLocationUpdates=true;
-
+    private boolean mRequestingLocationUpdates = true;
     //Time when the location was updated the last time.
     private String mLastUpdateTime;
-
     //Location API Providers and Clients
     private Location mCurrentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -116,12 +113,10 @@ public class UserScreen extends AppCompatActivity
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
-
-    public WeatherAPI weatherAPI;
-
     private ArrayList<CurrentData> mCurrentData;
     private ArrayList<KeyListHourly> mHourlyData;
     private ArrayList<KeyListDaily> mDailyData;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -169,18 +164,19 @@ public class UserScreen extends AppCompatActivity
                 break;
             case FIRST_TIME_VERSION:
                 //show what's new in future versions
-                Intent firstTimeInVersion = new Intent(this, FirstVersionLaunch.class);
-                startActivityForResult(firstTimeInVersion, NEW_VERSION);
+//                Intent firstTimeInVersion = new Intent(this, FirstVersionLaunch.class);
+//                startActivityForResult(firstTimeInVersion, NEW_VERSION);
                 break;
             case FIRST_TIME:
                 //the User has launched your app for the first time
                 //irrespective of the version code
-                Intent firstIntent = new Intent(this, FirstLaunch.class);
-                startActivityForResult(firstIntent, NEW_USER);
+//                Intent firstIntent = new Intent(this, FirstLaunch.class);
+//                startActivityForResult(firstIntent, NEW_USER);
                 break;
             default:
                 break;
         }
+        weatherAPI = new WeatherAPI();
         /*start code for established user
         get user data
         start using firebase database for storing data
@@ -218,17 +214,25 @@ public class UserScreen extends AppCompatActivity
             //in case the user has signed up with Phone Number instead of Email Address
             displayMail.setText("");
         }
+        //initialise data arrayLists
 
-        checkForLocationServices(this);
+        if (savedInstanceState != null) {
+            this.mCurrentData = savedInstanceState.getParcelableArrayList("CurrentData");
+            this.mHourlyData = savedInstanceState.getParcelableArrayList("HourlyData");
+            this.mDailyData = savedInstanceState.getParcelableArrayList("DailyData");
+        } else {
+            this.mDailyData = new ArrayList<>();
+            this.mHourlyData = new ArrayList<>();
+            this.mCurrentData = new ArrayList<>();
+        }
+        checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        checkPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
-
-        if(savedInstanceState!=null)
 
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
-
     }
 
     private void createLocationCallback() {
@@ -242,17 +246,27 @@ public class UserScreen extends AppCompatActivity
                 weatherAPI.getWeatherClient().getWeatherInfo().enqueue(new Callback<WeatherInfo>() {
                     @Override
                     public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
-                        for(CurrentData currentData:response.body().getCurrently()){
-
+                        for (CurrentData currentData : response.body().getCurrently()) {
+                            UserScreen.this.mCurrentData.add(currentData);
+                            Log.d(TAG, "onResponse: " + currentData.getSummary());
                         }
+//                        for (KeyListHourly hourlyData : response.body().getHourly()) {
+//                            UserScreen.this.mHourlyData.add(hourlyData);
+//                            Log.d(TAG, "onResponse: " + hourlyData.getSummary());
+//                        }
+//                        for (KeyListDaily dailyData : response.body().getDaily()) {
+//                            UserScreen.this.mDailyData.add(dailyData);
+//                            Log.d(TAG, "onResponse: " + dailyData.getSummary());
+//                        }
                     }
-
+//
                     @Override
                     public void onFailure(Call<WeatherInfo> call, Throwable t) {
 
                     }
                 });
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+                Log.d(TAG, "onLocationResult: " + mLastUpdateTime);
             }
         };
     }
@@ -301,7 +315,7 @@ public class UserScreen extends AppCompatActivity
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         } else if (!checkPermissions()) {
-            checkForLocationServices(this);
+            Toast.makeText(this, "Enable Permissions for Location Services", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -362,6 +376,9 @@ public class UserScreen extends AppCompatActivity
         savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(KEY_LOCATION, mCurrentLocation);
         savedInstanceState.putString(KEY_LAST_UPDATED_TIME_STRING, mLastUpdateTime);
+        savedInstanceState.putParcelable("CurrentData", (Parcelable) this.mCurrentData);
+        savedInstanceState.putParcelable("DailyData", (Parcelable) this.mDailyData);
+        savedInstanceState.putParcelable("HourlyData", (Parcelable) this.mHourlyData);
         super.onSaveInstanceState(savedInstanceState);
     }
 
