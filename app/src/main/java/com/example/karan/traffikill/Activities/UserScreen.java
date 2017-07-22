@@ -75,6 +75,7 @@ public class UserScreen extends AppCompatActivity
     private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 30000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 15000;
+    private static final String TAG = "LocationUpdates";
 
     //Firebase Authentication
     protected static FirebaseAuth userAuthentication;
@@ -93,7 +94,7 @@ public class UserScreen extends AppCompatActivity
     private boolean doubleBackToExitPressedOnce = false;
 
     //status check if location updates are turned on or not
-    private boolean mRequestingLocationUpdates;
+    private boolean mRequestingLocationUpdates=true;
 
     //Time when the location was updated the last time.
     private String mLastUpdateTime;
@@ -182,11 +183,14 @@ public class UserScreen extends AppCompatActivity
         }
         /*setup User UI details
         Get useful data to set up user profile*/
-        currentUserDetails = new UserDetails(currentUser.getDisplayName(), currentUser.getEmail(), currentUser.getPhotoUrl());
-        if (currentUserDetails.getName() != null) {
+        if (currentUser != null && currentUser.getDisplayName() != null)
+            currentUserDetails = new UserDetails(currentUser.getDisplayName(), currentUser.getEmail(), currentUser.getPhotoUrl());
+        if (currentUserDetails != null && currentUserDetails.getName() != null) {
             displayName.setText(currentUserDetails.getName());
+        } else {
+            displayName.setText("");
         }
-        if (currentUserDetails.getImageURL() != null) {
+        if (currentUserDetails != null && currentUserDetails.getImageURL() != null) {
             Picasso.with(getApplicationContext())
                     .load(currentUserDetails.getImageURL())
                     .placeholder(R.drawable.com_facebook_profile_picture_blank_square)
@@ -194,7 +198,7 @@ public class UserScreen extends AppCompatActivity
                     .centerCrop()
                     .into(profileImage);
         }
-        if (currentUserDetails.getEmail() != null) {
+        if (currentUser != null && currentUserDetails.getEmail() != null) {
             displayMail.setText(currentUserDetails.getEmail());
         } else {
             //in case the user has signed up with Phone Number instead of Email Address
@@ -216,6 +220,7 @@ public class UserScreen extends AppCompatActivity
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
+                Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLongitude() + "::" + mCurrentLocation.getLatitude());
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             }
         };

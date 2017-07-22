@@ -136,6 +136,8 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
                                 etPassword.getText().toString());
+                        if (UserScreen.userAuthentication.getCurrentUser() != null)
+                            startActivity(new Intent(LoginActivity.this, UserScreen.class));
                     }
                 } else {
                     if (UserScreen.userAuthentication.getCurrentUser() != null) {
