@@ -10,4 +10,7 @@
     <string name="facebook_app_id">326223524482591</string>
     <string name="fb_login_protocol_scheme">fb326223524482591</string>
     <string name="crash_toast_text">Send Crash Logs</string>
+    <string name="gps_network_not_enabled">Traffikill needs GPS Services. Please turn on GPS for the app to function properly.</string>
+    <string name="open_location_settings">Enable Location Services.</string>
+    <string name="Cancel">Don\'t Enable</string>
 </resources>
