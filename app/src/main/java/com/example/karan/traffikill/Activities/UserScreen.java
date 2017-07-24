@@ -519,10 +519,14 @@ public class UserScreen extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-
-        } else if (id == R.id.nav_gallery) {
+        Intent changingIntent;
+        if (id == R.id.nav_restaurants) {
+            changingIntent = new Intent(this, RestaurantActivity.class);
+            changingIntent.putExtra("latitude",mCurrentLocation.getLatitude());
+            changingIntent.putExtra("longitude",mCurrentLocation.getLongitude());
+            changingIntent.setType("restaurant");
+            startActivity(changingIntent);
+        } else if (id == R.id.nav_hotels) {
 
         } else if (id == R.id.nav_slideshow) {
 

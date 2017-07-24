@@ -8,16 +8,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 public class NearbyPlacesAPI {
-    public NearbyPlacesClient getNearbyPlaces() {
-        String BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+    public NearbyPlacesClient getNearbyPlacesClient() {
+        String BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         return retrofit.create(NearbyPlacesClient.class);
     }
-    public NearbyPlacesClient getPhotos(){
-        String BASE_URL = "https://maps.googleapis.com/maps/api/place/photo?";
+    public NearbyPlacesClient getPhotosClient(){
+        String BASE_URL = "https://maps.googleapis.com/maps/api/place/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
