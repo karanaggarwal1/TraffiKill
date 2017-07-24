@@ -62,7 +62,10 @@
         <activity
             android:name=".Activities.VerificationEmail"
             android:screenOrientation="portrait" />
-
+        <activity
+            android:name=".Activities.RestaurantActivity"
+            android:label="@string/title_activity_restaurant"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

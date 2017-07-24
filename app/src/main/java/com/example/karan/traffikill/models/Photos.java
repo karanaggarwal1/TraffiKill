@@ -19,6 +19,10 @@ public class Photos {
     }
 
     public class PhotosData {
+        public ArrayList<PhotoDetails> getPhotosData() {
+            return photosData;
+        }
+
         @SerializedName("photos")
         @Expose
         ArrayList<PhotoDetails> photosData;

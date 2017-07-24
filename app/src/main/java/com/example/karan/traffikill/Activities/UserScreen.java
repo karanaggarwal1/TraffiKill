@@ -87,11 +87,9 @@ public class UserScreen extends AppCompatActivity
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 150000;
     private static final String TAG = "LocationUpdates";
-
     //Firebase Authentication
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
-
     //checking AppStart mode
     private static AppStart appStart = null;
     public WeatherAPI weatherAPI;
@@ -519,10 +517,14 @@ public class UserScreen extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-
-        } else if (id == R.id.nav_gallery) {
+        Intent changingIntent;
+        if (id == R.id.nav_restaurants) {
+            changingIntent = new Intent(this, RestaurantActivity.class);
+            changingIntent.putExtra("latitude", mCurrentLocation.getLatitude());
+            changingIntent.putExtra("longitude", mCurrentLocation.getLongitude());
+            changingIntent.setType("restaurant");
+            startActivity(changingIntent);
+        } else if (id == R.id.nav_hotels) {
 
         } else if (id == R.id.nav_slideshow) {
 

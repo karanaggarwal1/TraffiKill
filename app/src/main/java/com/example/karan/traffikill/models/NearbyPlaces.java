@@ -35,6 +35,14 @@ public class NearbyPlaces {
         @Expose
         String vicinity;
 
+        @SerializedName("photos")
+        @Expose
+        ArrayList<PhotoDetails> photosData;
+
+        public ArrayList<PhotoDetails> getPhotosData() {
+            return photosData;
+        }
+
         public GeometryData getGeometry() {
             return geometry;
         }
@@ -49,6 +57,32 @@ public class NearbyPlaces {
 
         public String getVicinity() {
             return vicinity;
+        }
+
+        public class PhotoDetails {
+            @SerializedName("photo_reference")
+            @Expose
+            String photoReference;
+
+            @SerializedName("height")
+            @Expose
+            int height;
+
+            @SerializedName("width")
+            @Expose
+            int width;
+
+            public String getPhotoReference() {
+                return photoReference;
+            }
+
+            public int getHeight() {
+                return height;
+            }
+
+            public int getWidth() {
+                return width;
+            }
         }
 
         public class GeometryData {
