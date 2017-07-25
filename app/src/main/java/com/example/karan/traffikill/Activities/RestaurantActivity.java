@@ -149,9 +149,9 @@ public class RestaurantActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_restaurants) {
+        if (id == R.id.nav_camera) {
             return false;
-        } else if (id == R.id.nav_hotels) {
+        } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
 
