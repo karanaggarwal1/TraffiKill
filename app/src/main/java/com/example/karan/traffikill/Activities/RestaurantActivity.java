@@ -69,15 +69,7 @@ public class RestaurantActivity extends AppCompatActivity
         LatLng latLng = new LatLng(incomingIntent.getDoubleExtra("latitude", 0), incomingIntent.getDoubleExtra("longitude", 0));
         String location = latLng.latitude + "," + latLng.longitude;
         nearbyPlacesAPI = new NearbyPlacesAPI();
-//        try {
-//            Log.d(TAG, "onCreate: " + nearbyPlacesAPI.getNearbyPlacesClient().getNearbyPlaces(
-//                    location,
-//                    5000,
-//                    "restaurant"
-//            ).execute().body().getResults().get(0).getName());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+
         nearbyPlacesAPI.getNearbyPlacesClient().
                 getNearbyPlaces(
                         location,
@@ -124,7 +116,7 @@ public class RestaurantActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.restaurant, menu);
+        getMenuInflater().inflate(R.menu.user_screen_settings, menu);
         return true;
     }
 
@@ -149,9 +141,9 @@ public class RestaurantActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_restaurants) {
             return false;
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_hotels) {
 
         } else if (id == R.id.nav_slideshow) {
 
