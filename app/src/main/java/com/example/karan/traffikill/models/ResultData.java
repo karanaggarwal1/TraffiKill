@@ -10,6 +10,7 @@ import java.util.ArrayList;
  */
 
 public class ResultData {
+
     @SerializedName("geometry")
     @Expose
     GeometryData geometry;
@@ -28,10 +29,10 @@ public class ResultData {
 
     @SerializedName("photos")
     @Expose
-    ArrayList<PhotoDetails> photosData;
+    ArrayList<PhotoDetails> photos;
 
     public ArrayList<PhotoDetails> getPhotosData() {
-        return photosData;
+        return photos;
     }
 
     public GeometryData getGeometry() {
@@ -49,4 +50,5 @@ public class ResultData {
     public String getVicinity() {
         return vicinity;
     }
+
 }

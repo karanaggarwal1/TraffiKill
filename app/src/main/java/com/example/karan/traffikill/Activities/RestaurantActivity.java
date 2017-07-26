@@ -15,12 +15,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.Services.NearbyPlacesAPI;
 import com.example.karan.traffikill.models.NearbyPlaces;
-import com.example.karan.traffikill.models.Photos;
 import com.google.android.gms.maps.model.LatLng;
+import com.squareup.picasso.Picasso;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,6 +35,7 @@ public class RestaurantActivity extends AppCompatActivity
     NearbyPlacesAPI nearbyPlacesAPI;
     String photoReference;
     private String TAG = "RestaurantActivity";
+    private ImageView profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +49,9 @@ public class RestaurantActivity extends AppCompatActivity
         }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        NavigationView InavigationView = (NavigationView) findViewById(R.id.nav_view);
+        View hView = InavigationView.getHeaderView(0);
+        profileImage = (ImageView) (hView.findViewById(R.id.iv_profile_pic));
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,7 +73,6 @@ public class RestaurantActivity extends AppCompatActivity
         LatLng latLng = new LatLng(incomingIntent.getDoubleExtra("latitude", 0), incomingIntent.getDoubleExtra("longitude", 0));
         String location = latLng.latitude + "," + latLng.longitude;
         nearbyPlacesAPI = new NearbyPlacesAPI();
-
         nearbyPlacesAPI.getNearbyPlacesClient().
                 getNearbyPlaces(
                         location,
@@ -79,6 +82,15 @@ public class RestaurantActivity extends AppCompatActivity
                 if (response.isSuccessful()) {
                     Log.d(TAG, "onResponse: " + response.body().getResults().get(0).getGeometry().getLocationData().getLatitude());
                     photoReference = response.body().getResults().get(1).getPhotosData().get(0).getPhotoReference();
+                    Log.d(TAG, "onResponse: "+photoReference);
+                    String poster="https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key=AIzaSyCcWcxyuUpiemoDQzHGzJx-yd5jW0Pwt14" +
+                            "&photoreference="+photoReference;
+                    Picasso.with(RestaurantActivity.this)
+                            .load(poster)
+                            .fit()
+                            .placeholder(R.drawable.ic_placeholder)
+                            .error(R.drawable.ic_error)
+                            .into(profileImage);
                 }
             }
 
@@ -88,19 +100,8 @@ public class RestaurantActivity extends AppCompatActivity
                 Log.d(TAG, "onFailure: " + t.getStackTrace());
             }
         });
-        nearbyPlacesAPI.getPhotosClient().getPhotos(photoReference).enqueue(new Callback<Photos>() {
-            @Override
-            public void onResponse(Call<Photos> call, Response<Photos> response) {
-                if (response.body().getResults().size() != 0)
-                    Log.d(TAG, "onResponse: " + response.isSuccessful());
-            }
 
-            @Override
-            public void onFailure(Call<Photos> call, Throwable t) {
-                Log.d(TAG, "onFailure: " + t.getCause());
-                Log.d(TAG, "onFailure: " + t.getStackTrace());
-            }
-        });
+
     }
 
     @Override

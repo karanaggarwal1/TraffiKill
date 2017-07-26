@@ -9,10 +9,10 @@ import com.google.gson.annotations.SerializedName;
 public class GeometryData {
     @SerializedName("location")
     @Expose
-    LocationData locationData;
+    LocationData location;
 
     public LocationData getLocationData() {
-        return locationData;
+        return location;
     }
 
 }

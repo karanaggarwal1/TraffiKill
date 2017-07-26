@@ -14,7 +14,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -371,9 +370,9 @@ public class UserScreen extends AppCompatActivity
         savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(KEY_LOCATION, mCurrentLocation);
         savedInstanceState.putString(KEY_LAST_UPDATED_TIME_STRING, mLastUpdateTime);
-        savedInstanceState.putParcelable("CurrentData", (Parcelable) this.mCurrentData);
-        savedInstanceState.putParcelable("DailyData", (Parcelable) this.mDailyData);
-        savedInstanceState.putParcelable("HourlyData", (Parcelable) this.mHourlyData);
+//        savedInstanceState.putParcelable("CurrentData", (Parcelable) this.mCurrentData);
+//        savedInstanceState.putParcelable("DailyData", (Parcelable) this.mDailyData);
+//        savedInstanceState.putParcelable("HourlyData", (Parcelable) this.mHourlyData);
         super.onSaveInstanceState(savedInstanceState);
     }
 

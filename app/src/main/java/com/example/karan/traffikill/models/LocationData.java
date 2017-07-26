@@ -10,17 +10,17 @@ import com.google.gson.annotations.SerializedName;
 public class LocationData {
     @SerializedName("lat")
     @Expose
-    double latitude;
+    double lat;
 
     @SerializedName("lng")
     @Expose
-    double longitude;
+    double lng;
 
     public double getLatitude() {
-        return latitude;
+        return lat;
     }
 
     public double getLongitude() {
-        return longitude;
+        return lng;
     }
 }

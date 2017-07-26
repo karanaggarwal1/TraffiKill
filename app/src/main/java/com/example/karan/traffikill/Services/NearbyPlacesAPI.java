@@ -16,12 +16,5 @@ public class NearbyPlacesAPI {
                 .build();
         return retrofit.create(NearbyPlacesClient.class);
     }
-    public NearbyPlacesClient getPhotosClient(){
-        String BASE_URL = "https://maps.googleapis.com/maps/api/place/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(NearbyPlacesClient.class);
-    }
+
 }
