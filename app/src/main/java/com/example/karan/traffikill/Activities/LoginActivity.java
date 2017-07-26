@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,29 +14,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.R;
-import com.example.karan.traffikill.models.FacebookUser;
-import com.facebook.AccessToken;
+import com.example.karan.traffikill.Services.FacebookAuthenticator;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
@@ -49,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView btnSignUp, tvSignInWithPhoneNumber;
     Button btnSignIn;
     EditText etUsername, etPassword;
+    ProgressBar progressBar;
 
     @Override
     protected void onStart() {
@@ -60,14 +53,19 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         //TODO: add a google+ sign up method
         super.onCreate(savedInstanceState);
+        callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_login);
 
         checkPermission(this, Manifest.permission.INTERNET);
 
         etUsername = (EditText) findViewById(R.id.tvUsername);
         etPassword = (EditText) findViewById(R.id.tvPassword);
-
+        progressBar = (ProgressBar) findViewById(R.id.determinateBar);
         btnSignIn = (Button) findViewById(R.id.btnSignIn);
+
+        btnSignIn.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
+
         tvSignInWithPhoneNumber = (TextView) findViewById(R.id.tvsignInWithPhoneNumber);
 
         if (getIntent() != null) {
@@ -86,7 +84,6 @@ public class LoginActivity extends AppCompatActivity {
         if (UserScreen.userAuthentication.getCurrentUser() != null) {
             startActivity(new Intent(this, UserScreen.class));
         }
-        callbackManager = CallbackManager.Factory.create();
         fbloginButton = (LoginButton) findViewById(R.id.fb_login_button);
         btnSignUp = (TextView) findViewById(R.id.tv_signup);
 
@@ -99,23 +96,35 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         //Facebook Login Method
-        fbloginButton.setReadPermissions(Arrays.asList("user_friends", "public_profile", "email"));
-        fbloginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
+        fbloginButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
-                handleFacebookAccessToken(loginResult.getAccessToken());
-            }
+            public void onClick(View view) {
+                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this,
+                        Arrays.asList("public_profile", "user_friends, email"));
+                LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
+                        btnSignIn.setVisibility(View.INVISIBLE);
+                        progressBar.setVisibility(View.VISIBLE);
+                        facebookAuthenticator.initializor(LoginActivity.this,progressBar);
+                        facebookAuthenticator.execute(loginResult.getAccessToken());
+                    }
 
-            @Override
-            public void onCancel() {
+                    @Override
+                    public void onCancel() {
+                        Toast.makeText(LoginActivity.this, "Operation was Cancelled", Toast.LENGTH_SHORT).show();
+                    }
 
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-
+                    @Override
+                    public void onError(FacebookException error) {
+                        Log.d(TAG, "onError: " + error.getCause());
+                    }
+                });
             }
         });
+
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -195,40 +204,4 @@ public class LoginActivity extends AppCompatActivity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void handleFacebookAccessToken(final AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
-
-        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        UserScreen.userAuthentication.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "signInWithCredential:success");
-                            UserScreen.currentUser = UserScreen.userAuthentication.getCurrentUser();
-                            Log.d(TAG, "onComplete: " + UserScreen.currentUser);
-                            Log.d(TAG, "onComplete: " + UserScreen.currentUser.getDisplayName());
-                            Log.d(TAG, "onComplete: " + UserScreen.currentUser.getEmail());
-                            Log.d(TAG, "onComplete: " + UserScreen.currentUser.getUid());
-                            Toast.makeText(LoginActivity.this, "Login Successful!", Toast.LENGTH_SHORT).show();
-                            firebaseDatabase = FirebaseDatabase.getInstance();
-                            DatabaseReference ref = firebaseDatabase.getReference();
-                            DatabaseReference usersRef = ref.child("users");
-                            Map<String, FacebookUser> users = new HashMap<>();
-                            users.put(UserScreen.currentUser.getUid(), new FacebookUser(UserScreen.currentUser.getDisplayName()));
-                            if (usersRef.child(UserScreen.currentUser.getUid()) == null) {
-                                usersRef.setValue(users);
-                            } else {
-                                Toast.makeText(LoginActivity.this, "You have already registered with TraffiKill",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                            startActivity(new Intent(LoginActivity.this, UserScreen.class));
-                        } else {
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
 }

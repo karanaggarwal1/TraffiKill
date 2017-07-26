@@ -18,6 +18,16 @@
         android:paddingTop="12dp"
         android:textSize="20sp" />
 
+    <ProgressBar
+        android:id="@+id/determinateBar"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:progress="0"
+        android:visibility="invisible"
+        android:layout_below="@+id/tvPassword"
+        android:layout_centerHorizontal="true" />
+
     <EditText
         android:id="@+id/tvPassword"
         android:layout_width="280dp"
@@ -44,25 +54,25 @@
         android:textAllCaps="false" />
 
     <TextView
+        android:id="@+id/tvsignInWithPhoneNumber"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign In With Phone Number Instead"
         android:layout_below="@+id/btnSignIn"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="12dp"
-        android:id="@+id/tvsignInWithPhoneNumber" />
+        android:text="Sign In With Phone Number Instead" />
 
     <TextView
         android:id="@+id/tvNewUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="21dp"
-        android:text="New User?"
+        android:layout_alignLeft="@+id/fb_login_button"
+        android:layout_alignStart="@+id/fb_login_button"
+        android:layout_below="@+id/tvsignInWithPhoneNumber"
         android:layout_marginLeft="36dp"
         android:layout_marginStart="36dp"
-        android:layout_below="@+id/tvsignInWithPhoneNumber"
-        android:layout_alignLeft="@+id/fb_login_button"
-        android:layout_alignStart="@+id/fb_login_button" />
+        android:layout_marginTop="21dp"
+        android:text="New User?" />
 
     <TextView
         android:id="@+id/tv_signup"
