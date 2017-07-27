@@ -22,7 +22,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 /**
  * Created by Karan on 27-07-2017.
@@ -34,10 +33,11 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
     private Context context;
     private ProgressBar progressBar;
     private boolean retval;
-
-    public void initializor(Context context, ProgressBar progressBar) {
+    private FirebaseAuth firebaseAuth;
+    public void initializor(Context context, ProgressBar progressBar, FirebaseAuth firebaseAuth) {
         this.context = context;
         this.progressBar = progressBar;
+        this.firebaseAuth=firebaseAuth;
     }
 
     @Override
@@ -63,8 +63,8 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
     @Override
     protected Boolean doInBackground(AccessToken... params) {
         final AuthCredential credential = FacebookAuthProvider.getCredential(params[0].getToken());
-        FirebaseAuth.getInstance().signInWithCredential(credential)
-                .addOnCompleteListener((Executor) this, new OnCompleteListener<AuthResult>() {
+        this.firebaseAuth.signInWithCredential(credential)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
@@ -73,12 +73,11 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                             publishProgress(50);
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                             DatabaseReference ref = firebaseDatabase.getReference();
-                            DatabaseReference usersRef = ref.child("users");
+                            DatabaseReference usersRef = ref.child("usersFB");
                             if (usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()) == null) {
                                 DatabaseReference currentUserReference = ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 Map<String, String> userDetails = new HashMap<>();
                                 userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                userDetails.put("name", FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
                                     userDetails.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
                                 }

@@ -73,7 +73,6 @@ import retrofit2.Response;
 public class UserScreen extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    //REQUEST CODES and STRING KEYS
     public static final int NEW_VERSION = 123;
     public static final int NEW_USER = 234;
     public static final int PERM_REQ_CODE = 345;
@@ -94,6 +93,7 @@ public class UserScreen extends AppCompatActivity
     public WeatherAPI weatherAPI;
     protected UserDetails currentUserDetails;
     SharedPreferences checkFirstTimeStart;
+    //REQUEST CODES and STRING KEYS
     //UI elements.
     private ImageView profileImage;
     private TextView displayName;
@@ -472,21 +472,22 @@ public class UserScreen extends AppCompatActivity
         } else if (!drawer.isDrawerOpen(GravityCompat.START)) {
             super.onBackPressed();
         }
-        if (doubleBackToExitPressedOnce) {
-            android.os.Process.killProcess(android.os.Process.myPid());
-            return;
-        }
-
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
+        if (!drawer.isDrawerOpen(GravityCompat.START)) {
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                return;
             }
-        }, 2000);
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
+        }
     }
 
     @Override

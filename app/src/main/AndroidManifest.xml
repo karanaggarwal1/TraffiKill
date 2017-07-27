@@ -54,15 +54,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.SignUpActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".Activities.VerificationPhone"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".Activities.VerificationEmail"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".Activities.RestaurantActivity"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
