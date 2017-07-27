@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +29,13 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.truizlop.fabreveallayout.FABRevealLayout;
 import com.truizlop.fabreveallayout.OnRevealChangeListener;
 
@@ -98,12 +105,36 @@ public class LoginActivity extends AppCompatActivity {
                     UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
                             etPassword.getText().toString());
                 } else {
+                    progressBar.setVisibility(View.VISIBLE);
+                    progressBar.setProgress(0);
                     UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
-                            etPassword.getText().toString());
-                    if (UserScreen.userAuthentication.getCurrentUser() != null) {
-                        startActivity(new Intent(LoginActivity.this, UserScreen.class));
-                        finish();
-                    }
+                            etPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                progressBar.setProgress(100);
+                                progressBar.setVisibility(View.INVISIBLE);
+                                startActivity(new Intent(LoginActivity.this, UserScreen.class));
+                            } else {
+                                Log.d(TAG, "onComplete: " + task.getException());
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            if (e instanceof FirebaseAuthInvalidUserException) {
+                                progressBar.setProgress(100);
+                                progressBar.setVisibility(View.INVISIBLE);
+                                Toast.makeText(LoginActivity.this, "User doesn't exist", Toast.LENGTH_SHORT).show();
+                            } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                                progressBar.setProgress(100);
+                                progressBar.setVisibility(View.INVISIBLE);
+                                Toast.makeText(LoginActivity.this, "Incorrect Password", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.d(TAG, "onFailure: " + e.getCause());
+                            }
+                        }
+                    });
                 }
             }
         });

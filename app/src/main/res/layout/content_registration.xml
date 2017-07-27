@@ -110,7 +110,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:hint="Password"
-                    android:inputType="textEmailAddress"
+                    android:inputType="textPassword"
                     android:textColorHint="#c6c6c6" />
 
             </android.support.design.widget.TextInputLayout>

@@ -76,7 +76,7 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                             DatabaseReference usersRef = ref.child("usersFB");
                             if (usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()) == null) {
                                 DatabaseReference currentUserReference = ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                Map<String, String> userDetails = new HashMap<>();
+                                Map<String, Object> userDetails = new HashMap<>();
                                 userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
                                     userDetails.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
@@ -87,7 +87,7 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                                 if (FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() != null) {
                                     userDetails.put("photoURL", FirebaseAuth.getInstance().getCurrentUser().toString());
                                 }
-                                currentUserReference.setValue(userDetails);
+                                currentUserReference.updateChildren(userDetails);
                                 retval = true;
                                 publishProgress(100);
                             } else {

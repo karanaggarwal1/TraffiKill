@@ -3,18 +3,15 @@ package com.example.karan.traffikill.Activities;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -24,7 +21,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -127,7 +123,6 @@ public class UserScreen extends AppCompatActivity
         setContentView(R.layout.user_screen);
 
         checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        checkPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
         checkPermission(this, Manifest.permission.INTERNET);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -222,8 +217,6 @@ public class UserScreen extends AppCompatActivity
             this.mHourlyData = new ArrayList<>();
             this.mCurrentData = new ArrayList<>();
         }
-        checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        checkPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
 
@@ -306,7 +299,7 @@ public class UserScreen extends AppCompatActivity
         super.onResume();
         // Within {@code onPause()}, we remove location updates. Here, we resume receiving
         // location updates if the user has requested them.
-        if (mRequestingLocationUpdates) {
+        if (checkPermissions()) {
             startLocationUpdates();
         } else if (!checkPermissions()) {
             Toast.makeText(this, "Enable Permissions for Location Services", Toast.LENGTH_SHORT).show();
@@ -390,33 +383,6 @@ public class UserScreen extends AppCompatActivity
             if (savedInstanceState.keySet().contains(KEY_LAST_UPDATED_TIME_STRING)) {
                 mLastUpdateTime = savedInstanceState.getString(KEY_LAST_UPDATED_TIME_STRING);
             }
-        }
-    }
-
-    private void checkForLocationServices(Context context) {
-        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        boolean gps_enabled;
-
-        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-        if (!gps_enabled) {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-            dialog.setMessage(context.getResources().getString(R.string.gps_network_not_enabled));
-            dialog.setPositiveButton(context.getResources().getString(R.string.open_location_settings),
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                            startActivity(myIntent);
-                        }
-                    });
-            dialog.setNegativeButton(context.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-
-                }
-            });
-            dialog.show();
         }
     }
 
