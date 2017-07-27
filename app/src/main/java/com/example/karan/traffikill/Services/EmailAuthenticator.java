@@ -50,10 +50,21 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                     userDetails.put("email", EmailAuthenticator.this.etEmail);
                     currentUserReference.setValue(userDetails);
                     retval = true;
-                    publishProgress(100);
+                    publishProgress(90);
+                    firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(EmailAuthenticator.this.context,
+                                        "Verification Email Sent",
+                                        Toast.LENGTH_SHORT).show();
+                                publishProgress(100);
+                            }
+                        }
+                    });
                     EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserScreen.class));
-                }else{
-                    Log.d("EmailAuthenticator", "onComplete: "+task.getException());
+                } else {
+                    Log.d("EmailAuthenticator", "onComplete: " + task.getException());
                 }
             }
 
@@ -81,7 +92,7 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
         this.context = context;
         this.etEmail = etEmail;
         this.etPassword = etPassword;
-        this.userName=userName;
+        this.userName = userName;
         this.firebaseAuth = FirebaseAuth.getInstance();
     }
 }
