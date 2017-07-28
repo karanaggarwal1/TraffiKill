@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.example.karan.traffikill.Activities.UserScreen;
+import com.example.karan.traffikill.Activities.UserActivity;
 import com.facebook.AccessToken;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -17,8 +17,11 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +37,11 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
     private ProgressBar progressBar;
     private boolean retval;
     private FirebaseAuth firebaseAuth;
+
     public void initializor(Context context, ProgressBar progressBar, FirebaseAuth firebaseAuth) {
         this.context = context;
         this.progressBar = progressBar;
-        this.firebaseAuth=firebaseAuth;
+        this.firebaseAuth = firebaseAuth;
     }
 
     @Override
@@ -72,31 +76,43 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                             Toast.makeText(FacebookAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
                             publishProgress(50);
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                            DatabaseReference ref = firebaseDatabase.getReference();
-                            DatabaseReference usersRef = ref.child("usersFB");
-                            if (usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()) == null) {
-                                DatabaseReference currentUserReference = ref.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                Map<String, Object> userDetails = new HashMap<>();
-                                userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                                if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
-                                    userDetails.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                                }
-                                if (FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber() != null) {
-                                    userDetails.put("phoneNumber", FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
-                                }
-                                if (FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() != null) {
-                                    userDetails.put("photoURL", FirebaseAuth.getInstance().getCurrentUser().toString());
-                                }
-                                currentUserReference.updateChildren(userDetails);
-                                retval = true;
-                                publishProgress(100);
-                            } else {
-                                Toast.makeText(FacebookAuthenticator.this.context, "You have already registered with TraffiKill",
-                                        Toast.LENGTH_SHORT).show();
-                                retval = true;
-                                publishProgress(100);
-                            }
-                            FacebookAuthenticator.this.context.startActivity(new Intent(FacebookAuthenticator.this.context, UserScreen.class));
+                            final DatabaseReference ref = firebaseDatabase.getReference();
+                            final DatabaseReference usersRef = ref.child("usersFB");
+                            usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent
+                                    (new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+
+                                            DatabaseReference currentUserReference = usersRef.child(FirebaseAuth.getInstance().
+                                                    getCurrentUser().getUid());
+                                            Map<String, Object> userDetails = new HashMap<>();
+                                            userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                            if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
+                                                userDetails.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                                            }
+                                            if (FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber() != null) {
+                                                userDetails.put("phoneNumber", FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
+                                            }
+                                            if (FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() != null) {
+                                                userDetails.put("photoURL", FirebaseAuth.getInstance().getCurrentUser().
+                                                        getPhotoUrl().toString());
+                                            }
+                                            currentUserReference.setValue(userDetails);
+                                            retval = true;
+                                            publishProgress(100);
+
+
+                                        }
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            Toast.makeText(FacebookAuthenticator.this.context, "You have already registered with TraffiKill",
+                                                    Toast.LENGTH_SHORT).show();
+                                            retval = true;
+                                            publishProgress(100);
+                                        }
+                                    });
+                            FacebookAuthenticator.this.context.startActivity(new Intent(FacebookAuthenticator.this.context,
+                                    UserActivity.class));
                         } else {
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(FacebookAuthenticator.this.context, "Authentication failed.",

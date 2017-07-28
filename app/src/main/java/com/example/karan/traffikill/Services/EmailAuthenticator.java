@@ -8,11 +8,12 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.karan.traffikill.Activities.UserScreen;
+import com.example.karan.traffikill.Activities.UserActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -44,7 +45,7 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                     DatabaseReference ref = firebaseDatabase.getReference();
                     DatabaseReference usersRef = ref.child("usersEmail");
-                    DatabaseReference currentUserReference = ref.child(EmailAuthenticator.this.userName);
+                    DatabaseReference currentUserReference = usersRef.child(EmailAuthenticator.this.userName);
                     Map<String, String> userDetails = new HashMap<>();
                     userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
                     userDetails.put("email", EmailAuthenticator.this.etEmail);
@@ -62,8 +63,12 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                             }
                         }
                     });
-                    EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserScreen.class));
-                } else {
+                    EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserActivity.class));
+                }
+                else if(task.getException() instanceof FirebaseAuthUserCollisionException){
+                    Toast.makeText(EmailAuthenticator.this.context,"User already exists",Toast.LENGTH_SHORT).show();
+                }
+                else {
                     Log.d("EmailAuthenticator", "onComplete: " + task.getException());
                 }
             }

@@ -8,29 +8,29 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.karan.traffikill.Adapters.NavigationTabAdapter;
+import com.example.karan.traffikill.Fragments.AboutApp;
+import com.example.karan.traffikill.Fragments.CurrentDayForecast;
+import com.example.karan.traffikill.Fragments.NearbyHotels;
+import com.example.karan.traffikill.Fragments.NearbyRestaurants;
+import com.example.karan.traffikill.Fragments.UserProfile;
+import com.example.karan.traffikill.Fragments.WeeklyData;
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.Services.WeatherAPI;
 import com.example.karan.traffikill.models.CurrentData;
@@ -55,20 +55,17 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import devlight.io.library.ntb.NavigationTabBar;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
-public class UserScreen extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-
+public class UserActivity extends AppCompatActivity {
     public static final int NEW_VERSION = 123;
     public static final int NEW_USER = 234;
     public static final int PERM_REQ_CODE = 345;
@@ -81,25 +78,33 @@ public class UserScreen extends AppCompatActivity
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 150000;
     private static final String TAG = "LocationUpdates";
-    //Firebase Authentication
+
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
-    //checking AppStart mode
+
     private static AppStart appStart = null;
     public WeatherAPI weatherAPI;
     protected UserDetails currentUserDetails;
+    NavigationTabAdapter navigationTabAdapter;
+    NavigationTabBar navigationTabBar;
+    ViewPager viewPager;
+    NearbyHotels nearbyHotels;
+    NearbyRestaurants nearbyRestaurants;
+    AboutApp aboutApp;
+    UserProfile userProfile;
+    CurrentDayForecast currentDayForecast;
+    WeeklyData weeklyData;
     SharedPreferences checkFirstTimeStart;
-    //REQUEST CODES and STRING KEYS
-    //UI elements.
+
     private ImageView profileImage;
     private TextView displayName;
     private TextView displayMail;
     private boolean doubleBackToExitPressedOnce = false;
-    //status check if location updates are turned on or not
+
     private boolean mRequestingLocationUpdates = true;
-    //Time when the location was updated the last time.
+
     private String mLastUpdateTime;
-    //Location API Providers and Clients
+
     private Location mCurrentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private SettingsClient settingsClient;
@@ -116,102 +121,39 @@ public class UserScreen extends AppCompatActivity
         currentUser = userAuthentication.getCurrentUser();
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.user_screen);
-
+        setContentView(R.layout.activity_user);
         checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         checkPermission(this, Manifest.permission.INTERNET);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        NavigationView InavigationView = (NavigationView) findViewById(R.id.nav_view);
-        View hView = InavigationView.getHeaderView(0);
-        profileImage = (ImageView) (hView.findViewById(R.id.iv_profile_pic));
-        displayName = (TextView) (hView.findViewById(R.id.tvName));
-        displayMail = (TextView) (hView.findViewById(R.id.email));
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        initUI();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.getWindow().setStatusBarColor(R.color.transparent);
+        }
         checkFirstTimeStart = getSharedPreferences("TRAFFIKILL", MODE_PRIVATE);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
         switch (checkAppStart(this, checkFirstTimeStart)) {
             case NORMAL:
                 break;
             case FIRST_TIME_VERSION:
-                //show what's new in future versions
-//                Intent firstTimeInVersion = new Intent(this, FirstVersionLaunch.class);
-//                startActivityForResult(firstTimeInVersion, NEW_VERSION);
+
+
                 break;
             case FIRST_TIME:
-                //the User has launched your app for the first time
-                //irrespective of the version code
-//                Intent firstIntent = new Intent(this, FirstLaunch.class);
-//                startActivityForResult(firstIntent, NEW_USER);
+
+
                 break;
             default:
                 break;
         }
-        weatherAPI = new WeatherAPI();
-        /*start code for established user
-        get user data
-        start using firebase database for storing data
-        three possible cases, launched app but user is signed out,
-        never made an account but launched the app before
-        the user is signed in*/
         userAuthentication = FirebaseAuth.getInstance();
         if (currentUser == null) {
-            //redirect user to login screen
-            //show login Activity
             Intent loginScreen = new Intent(this, LoginActivity.class);
             startActivity(loginScreen);
             finish();
         }
-        /*setup User UI details
-        Get useful data to set up user profile*/
-        if (currentUser != null && currentUser.getDisplayName() != null)
-            currentUserDetails = new UserDetails(currentUser.getDisplayName(), currentUser.getEmail(), currentUser.getPhotoUrl());
-        if (currentUserDetails != null && currentUserDetails.getName() != null) {
-            displayName.setText(currentUserDetails.getName());
-        } else {
-            displayName.setText("");
-        }
-        if (currentUserDetails != null && currentUserDetails.getImageURL() != null) {
-            Picasso.with(getApplicationContext())
-                    .load(currentUserDetails.getImageURL())
-                    .placeholder(R.drawable.com_facebook_profile_picture_blank_square)
-                    .resize(200, 200)
-                    .centerCrop()
-                    .into(profileImage);
-        }
-        if (currentUser != null && currentUserDetails.getEmail() != null) {
-            displayMail.setText(currentUserDetails.getEmail());
-        } else {
-            //in case the user has signed up with Phone Number instead of Email Address
-            displayMail.setText("");
-        }
-        //initialise data arrayLists
-
         if (savedInstanceState != null) {
-            this.mCurrentData = savedInstanceState.getParcelableArrayList("CurrentData");
-            this.mHourlyData = savedInstanceState.getParcelableArrayList("HourlyData");
-            this.mDailyData = savedInstanceState.getParcelableArrayList("DailyData");
+            updateValuesFromBundle(savedInstanceState);
         } else {
             this.mDailyData = new ArrayList<>();
             this.mHourlyData = new ArrayList<>();
@@ -219,7 +161,6 @@ public class UserScreen extends AppCompatActivity
         }
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
-
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -232,17 +173,17 @@ public class UserScreen extends AppCompatActivity
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
                 Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLatitude() + "::" + mCurrentLocation.getLongitude());
-                //Get request to Dark Sky API will be made here, every time the location is changed
+                weatherAPI = new WeatherAPI();
                 weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()).
                         enqueue(new Callback<WeatherInfo>() {
                             @Override
                             public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
                                 Log.d(TAG, "onResponse: " + response.isSuccessful());
-                                UserScreen.this.mCurrentData.add(response.body().getCurrently());
+                                UserActivity.this.mCurrentData.add(response.body().getCurrently());
                                 Log.d(TAG, "onResponse: " + response.body().getCurrently().getSummary());
-                                UserScreen.this.mHourlyData.add(response.body().getHourly());
+                                UserActivity.this.mHourlyData.add(response.body().getHourly());
                                 Log.d(TAG, "onResponse: " + response.body().getHourly().getSummary());
-                                UserScreen.this.mDailyData.add(response.body().getDaily());
+                                UserActivity.this.mDailyData.add(response.body().getDaily());
                                 Log.d(TAG, "onResponse: " + response.body().getDaily().getSummary());
                             }
 
@@ -260,13 +201,8 @@ public class UserScreen extends AppCompatActivity
 
     private void stopLocationUpdates() {
         if (!mRequestingLocationUpdates) {
-//            Log.d(TAG, "stopLocationUpdates: updates never requested, no-op.");
             return;
         }
-
-        // It is a good practice to remove location requests when the activity is in a paused or
-        // stopped state. Doing so helps battery performance and is especially
-        // recommended in applications that request frequent location updates.
         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
@@ -278,13 +214,7 @@ public class UserScreen extends AppCompatActivity
 
     private void createLocationRequest() {
         locationRequest = new LocationRequest();
-        // Sets the desired interval for active location updates. This interval is
-        // inexact. You may not receive updates at all if no location sources are available, or
-        // you may receive them slower than requested. You may also receive updates faster than
-        // requested if other applications are requesting location at a faster interval.
         locationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-        // Sets the fastest rate for active location updates. This interval is exact, and your
-        // application will never receive updates faster than this value.
         locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
@@ -297,8 +227,6 @@ public class UserScreen extends AppCompatActivity
 
     public void onResume() {
         super.onResume();
-        // Within {@code onPause()}, we remove location updates. Here, we resume receiving
-        // location updates if the user has requested them.
         if (checkPermissions()) {
             startLocationUpdates();
         } else if (!checkPermissions()) {
@@ -307,13 +235,15 @@ public class UserScreen extends AppCompatActivity
     }
 
     private void startLocationUpdates() {
-        // Begin by checking if the device has the necessary location settings.
         settingsClient.checkLocationSettings(locationSettingsRequest)
                 .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
                     @Override
                     public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-//                        Log.i(TAG, "All location settings are satisfied.");
-                        //noinspection MissingPermission
+                        if (ActivityCompat.checkSelfPermission(UserActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                                PackageManager.PERMISSION_GRANTED &&
+                                ActivityCompat.checkSelfPermission(UserActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            return;
+                        }
                         fusedLocationProviderClient.requestLocationUpdates(locationRequest,
                                 locationCallback, Looper.myLooper());
                     }
@@ -324,22 +254,17 @@ public class UserScreen extends AppCompatActivity
                         int statusCode = ((ApiException) e).getStatusCode();
                         switch (statusCode) {
                             case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-//                                Log.i(TAG, "Location settings are not satisfied. Attempting to upgrade " +
-//                                        "location settings ");
                                 try {
-                                    // Show the dialog by calling startResolutionForResult(), and check the
-                                    // result in onActivityResult().
                                     ResolvableApiException rae = (ResolvableApiException) e;
-                                    rae.startResolutionForResult(UserScreen.this, REQUEST_CHECK_SETTINGS);
+                                    rae.startResolutionForResult(UserActivity.this, REQUEST_CHECK_SETTINGS);
                                 } catch (IntentSender.SendIntentException sie) {
-//                                    Log.i(TAG, "PendingIntent unable to execute request.");
+
                                 }
                                 break;
                             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                                 String errorMessage = "Location settings are inadequate, and cannot be " +
                                         "fixed here. Fix in Settings.";
-//                                Log.e(TAG, errorMessage);
-                                Toast.makeText(UserScreen.this, errorMessage, Toast.LENGTH_LONG).show();
+                                Toast.makeText(UserActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                                 mRequestingLocationUpdates = false;
                         }
                     }
@@ -349,7 +274,6 @@ public class UserScreen extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        // Remove location updates to save battery.
         stopLocationUpdates();
     }
 
@@ -363,9 +287,6 @@ public class UserScreen extends AppCompatActivity
         savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
         savedInstanceState.putParcelable(KEY_LOCATION, mCurrentLocation);
         savedInstanceState.putString(KEY_LAST_UPDATED_TIME_STRING, mLastUpdateTime);
-//        savedInstanceState.putParcelable("CurrentData", (Parcelable) this.mCurrentData);
-//        savedInstanceState.putParcelable("DailyData", (Parcelable) this.mDailyData);
-//        savedInstanceState.putParcelable("HourlyData", (Parcelable) this.mHourlyData);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -421,7 +342,7 @@ public class UserScreen extends AppCompatActivity
     }
 
     public void checkPermission(Context context, String perm) {
-        //TODO: Implement a permission driven interface in other activities as well
+
         if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
         }
@@ -432,82 +353,129 @@ public class UserScreen extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (!drawer.isDrawerOpen(GravityCompat.START)) {
+        if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
+            return;
         }
-        if (!drawer.isDrawerOpen(GravityCompat.START)) {
-            if (doubleBackToExitPressedOnce) {
-                super.onBackPressed();
-                return;
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
+
+
+    private void initUI() {
+        viewPager = (ViewPager) findViewById(R.id.navFragContainer);
+        navigationTabAdapter = new NavigationTabAdapter(getSupportFragmentManager());
+        aboutApp = new AboutApp();
+        weeklyData = new WeeklyData();
+        currentDayForecast = new CurrentDayForecast();
+        nearbyHotels = new NearbyHotels();
+        nearbyRestaurants = new NearbyRestaurants();
+        userProfile = new UserProfile();
+        userProfile.setContext(this);
+        navigationTabAdapter.addFragment(currentDayForecast);
+        navigationTabAdapter.addFragment(weeklyData);
+        navigationTabAdapter.addFragment(userProfile);
+        navigationTabAdapter.addFragment(nearbyRestaurants);
+        navigationTabAdapter.addFragment(nearbyHotels);
+        navigationTabAdapter.addFragment(aboutApp);
+        viewPager.setAdapter(navigationTabAdapter);
+        final String[] colors = getResources().getStringArray(R.array.vertical_ntb);
+        navigationTabBar = (NavigationTabBar) findViewById(R.id.ntb_horizontal);
+        final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_first),
+                        Color.parseColor(colors[0]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_first))
+                        .title("Forecast")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_second),
+                        Color.parseColor(colors[0]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_second))
+                        .title("This Week")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_fifth),
+                        Color.parseColor(colors[3]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_fifth))
+                        .title("Profile")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_third),
+                        Color.parseColor(colors[1]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_third))
+                        .title("Restaurants")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_fourth),
+                        Color.parseColor(colors[2]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_fourth))
+                        .title("Hotels")
+                        .build()
+        );
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_sixth),
+                        Color.parseColor(colors[4]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_sixth))
+                        .title("About")
+                        .build()
+        );
+
+        navigationTabBar.setModels(models);
+        navigationTabBar.deselect();
+        navigationTabBar.setViewPager(viewPager, 2);
+        navigationTabBar.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels) {
+
             }
 
-            this.doubleBackToExitPressedOnce = true;
-            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onPageSelected(final int position) {
+                navigationTabBar.getModels().get(position).hideBadge();
+            }
 
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    doubleBackToExitPressedOnce = false;
+            @Override
+            public void onPageScrollStateChanged(final int state) {
+
+            }
+        });
+
+        navigationTabBar.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < navigationTabBar.getModels().size(); i++) {
+                    final NavigationTabBar.Model model = navigationTabBar.getModels().get(i);
+                    navigationTabBar.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            model.showBadge();
+                        }
+                    }, i * 100);
                 }
-            }, 2000);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.user_screen_settings, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        Intent changingIntent;
-        if (id == R.id.nav_restaurants) {
-            changingIntent = new Intent(this, RestaurantActivity.class);
-            changingIntent.putExtra("latitude", mCurrentLocation.getLatitude());
-            changingIntent.putExtra("longitude", mCurrentLocation.getLongitude());
-            changingIntent.setType("restaurant");
-            startActivity(changingIntent);
-        } else if (id == R.id.nav_hotels) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+            }
+        }, 500);
     }
 
     public enum AppStart {
         FIRST_TIME, FIRST_TIME_VERSION, NORMAL
     }
-
 }

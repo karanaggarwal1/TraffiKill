@@ -65,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         callbackManager = CallbackManager.Factory.create();
         setContentView(R.layout.activity_test);
-
         checkPermission(this, Manifest.permission.INTERNET);
 
         cancel = (ImageView) findViewById(R.id.cancel);
@@ -80,12 +79,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        UserScreen.userAuthentication = FirebaseAuth.getInstance();
-        if (UserScreen.currentUser != null) {
-            UserScreen.userAuthentication.signOut();
+        UserActivity.userAuthentication = FirebaseAuth.getInstance();
+        if (UserActivity.currentUser != null) {
+            UserActivity.userAuthentication.signOut();
+            LoginManager.getInstance().logOut();
         }
-        if (UserScreen.userAuthentication.getCurrentUser() != null) {
-            startActivity(new Intent(this, UserScreen.class));
+        if (UserActivity.userAuthentication.getCurrentUser() != null) {
+            startActivity(new Intent(this, UserActivity.class));
         }
 
         etUsername = (EditText) findViewById(R.id.tvUsername);
@@ -100,21 +100,21 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: ButtonClicked");
-                if (UserScreen.userAuthentication.getCurrentUser() != null) {
-                    UserScreen.userAuthentication.signOut();
-                    UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
+                if (UserActivity.userAuthentication.getCurrentUser() != null) {
+                    UserActivity.userAuthentication.signOut();
+                    UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
                             etPassword.getText().toString());
                 } else {
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(0);
-                    UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
+                    UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
                             etPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 progressBar.setProgress(100);
                                 progressBar.setVisibility(View.INVISIBLE);
-                                startActivity(new Intent(LoginActivity.this, UserScreen.class));
+                                startActivity(new Intent(LoginActivity.this, UserActivity.class));
                             } else {
                                 Log.d(TAG, "onComplete: " + task.getException());
                             }
@@ -150,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onSuccess(LoginResult loginResult) {
                         FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
                         progressBar.setVisibility(View.VISIBLE);
-                        facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserScreen.userAuthentication);
+                        facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication);
                         facebookAuthenticator.execute(loginResult.getAccessToken());
                     }
 
@@ -181,7 +181,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        UserScreen.currentUser = UserScreen.userAuthentication.getCurrentUser();
+        UserActivity.currentUser = UserActivity.userAuthentication.getCurrentUser();
     }
 
     private void configureFABReveal(FABRevealLayout fabRevealLayout) {
@@ -202,16 +202,16 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         Log.d(TAG, "onClick: ButtonClicked");
-                        if (UserScreen.userAuthentication.getCurrentUser() != null) {
-                            UserScreen.userAuthentication.signOut();
+                        if (UserActivity.userAuthentication.getCurrentUser() != null) {
+                            UserActivity.userAuthentication.signOut();
                             LoginManager.getInstance().logOut();
-                            UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
+                            UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
                                     etPassword.getText().toString());
                         } else {
-                            UserScreen.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
+                            UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
                                     etPassword.getText().toString());
-                            if (UserScreen.userAuthentication.getCurrentUser() != null)
-                                startActivity(new Intent(LoginActivity.this, UserScreen.class));
+                            if (UserActivity.userAuthentication.getCurrentUser() != null)
+                                startActivity(new Intent(LoginActivity.this, UserActivity.class));
                         }
                     }
                 });
@@ -227,7 +227,7 @@ public class LoginActivity extends AppCompatActivity {
                             public void onSuccess(LoginResult loginResult) {
                                 FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
                                 progressBar.setVisibility(View.VISIBLE);
-                                facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserScreen.userAuthentication);
+                                facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication);
                                 facebookAuthenticator.execute(loginResult.getAccessToken());
                             }
 
@@ -253,6 +253,8 @@ public class LoginActivity extends AppCompatActivity {
                 etConfirmPassword = (EditText) secondaryView.findViewById(R.id.etConfirmPassWord);
                 etSignUpUsername = (EditText) secondaryView.findViewById(R.id.etUsername);
                 btnGetStarted = (Button) secondaryView.findViewById(R.id.btnGetStarted);
+                final ProgressBar progressBar=(ProgressBar)findViewById(R.id.progressBar);
+                progressBar.setVisibility(View.INVISIBLE);
                 etEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 emailAuthenticator = new EmailAuthenticator();
                 btnGetStarted.setOnClickListener(new View.OnClickListener() {
@@ -271,6 +273,7 @@ public class LoginActivity extends AppCompatActivity {
                                     etEmail.getText().toString(),
                                     etSignUpPassword.getText().toString(),
                                     etSignUpUsername.getText().toString());
+                            progressBar.setVisibility(View.VISIBLE);
                             emailAuthenticator.execute();
                             btnGetStarted.setClickable(false);
                         }

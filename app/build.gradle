@@ -43,6 +43,8 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.truizlop.fabreveallayout:library:1.0.0'
     compile 'com.google.android.gms:play-services-maps:11.0.2'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'devlight.io:navigationtabbar:1.2.5'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'
