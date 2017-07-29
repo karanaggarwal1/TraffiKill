@@ -65,7 +65,6 @@ import retrofit2.Response;
 public class UserActivity extends AppCompatActivity {
     public static final int PERM_REQ_CODE = 345;
     public static final int REQUEST_CHECK_SETTINGS = 456;
-    private static final String LAST_APP_VERSION = "1";
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     private final static String KEY_LOCATION = "location";
     private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
@@ -102,9 +101,9 @@ public class UserActivity extends AppCompatActivity {
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
-    private ArrayList<CurrentData> mCurrentData;
-    private ArrayList<KeyListHourly> mHourlyData;
-    private ArrayList<KeyListDaily> mDailyData;
+    public static ArrayList<CurrentData> mCurrentData;
+    public static ArrayList<KeyListHourly> mHourlyData;
+    public static ArrayList<KeyListDaily> mDailyData;
 
     @Override
     protected void onStart() {
@@ -317,6 +316,14 @@ public class UserActivity extends AppCompatActivity {
         }, 2000);
     }
 
+    @Override
+    protected void onDestroy() {
+        //cache clearing
+        this.mCurrentData = new ArrayList<>();
+        this.mDailyData = new ArrayList<>();
+        this.mHourlyData = new ArrayList<>();
+        super.onDestroy();
+    }
 
     private void initUI() {
         viewPager = (ViewPager) findViewById(R.id.navFragContainer);
@@ -327,6 +334,15 @@ public class UserActivity extends AppCompatActivity {
         nearbyHotels = new NearbyHotels();
         nearbyRestaurants = new NearbyRestaurants();
         userProfile = new UserProfile();
+        Bundle userDetails = new Bundle();
+        if (FirebaseAuth.getInstance().getCurrentUser().getProviderId().equals("facebook.com")) {
+            userDetails.putString("provider", "facebook");
+        } else if (FirebaseAuth.getInstance().getCurrentUser().getProviderId().equals("google.com")) {
+            userDetails.putString("provider", "google");
+        } else {
+            userDetails.putString("provider", "email");
+        }
+        userProfile.setArguments(userDetails);
         userProfile.setContext(this);
         navigationTabAdapter.addFragment(currentDayForecast);
         navigationTabAdapter.addFragment(weeklyData);

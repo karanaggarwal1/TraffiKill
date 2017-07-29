@@ -20,6 +20,14 @@ public class EmailUser {
     @Expose
     private String verified;
 
+    @SerializedName("name")
+    @Expose
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
     public String getUsername() {
         return username;
     }
