@@ -11,7 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -51,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText etUsername, etPassword, etEmail, etSignUpUsername, etSignUpPassword, etConfirmPassword;
     ProgressBar progressBar;
     EmailAuthenticator emailAuthenticator;
+    EditText etName;
 
     public static boolean isValidEmail(CharSequence target) {
         if (target == null) {
@@ -248,12 +251,81 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSecondaryViewAppeared(final FABRevealLayout fabRevealLayout, View secondaryView) {
                 cancel.setVisibility(View.VISIBLE);
+                etName = (EditText) secondaryView.findViewById(R.id.etName);
                 etEmail = (EditText) secondaryView.findViewById(R.id.etEmail);
                 etSignUpPassword = (EditText) secondaryView.findViewById(R.id.etPassword);
                 etConfirmPassword = (EditText) secondaryView.findViewById(R.id.etConfirmPassWord);
                 etSignUpUsername = (EditText) secondaryView.findViewById(R.id.etUsername);
                 btnGetStarted = (Button) secondaryView.findViewById(R.id.btnGetStarted);
-                final ProgressBar progressBar=(ProgressBar)findViewById(R.id.progressBar);
+                final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                etName.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (s.toString().trim().equals("")) {
+                            btnGetStarted.setClickable(false);
+                            Toast.makeText(LoginActivity.this, "Please Enter your name", Toast.LENGTH_SHORT).show();
+                        } else {
+                            btnGetStarted.setClickable(true);
+                        }
+                    }
+                });
+                etEmail.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (s.toString().trim().equals("")) {
+                            btnGetStarted.setClickable(false);
+                            Toast.makeText(LoginActivity.this, "Please Enter your name", Toast.LENGTH_SHORT).show();
+                        } else {
+                            btnGetStarted.setClickable(true);
+                        }
+                    }
+                });
+                etSignUpPassword.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (s.toString().trim().equals("")) {
+                            btnGetStarted.setClickable(false);
+                            Toast.makeText(LoginActivity.this, "Please Enter your name", Toast.LENGTH_SHORT).show();
+                        } else {
+                            btnGetStarted.setClickable(true);
+                        }
+                    }
+                });
+                if (!etName.getText().toString().equals("") &&
+                        !etEmail.getText().toString().equals("") &&
+                        !etSignUpPassword.getText().toString().equals("")) {
+                    btnGetStarted.setClickable(true);
+                }
                 progressBar.setVisibility(View.INVISIBLE);
                 etEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                 emailAuthenticator = new EmailAuthenticator();
@@ -268,8 +340,10 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Passwords Do Not Match!", Toast.LENGTH_SHORT).show();
                             return;
                         }
+
                         if (etSignUpPassword.getText().toString().equals(etConfirmPassword.getText().toString())) {
                             emailAuthenticator.initialise(LoginActivity.this,
+                                    etName.getText().toString(),
                                     etEmail.getText().toString(),
                                     etSignUpPassword.getText().toString(),
                                     etSignUpUsername.getText().toString());

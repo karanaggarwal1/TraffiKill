@@ -76,28 +76,30 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                             Toast.makeText(FacebookAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
                             publishProgress(50);
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                            final DatabaseReference ref = firebaseDatabase.getReference();
+                            final DatabaseReference ref = firebaseDatabase.getReference().child("authorised");
                             final DatabaseReference usersRef = ref.child("usersFB");
                             usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent
                                     (new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
-
-                                            DatabaseReference currentUserReference = usersRef.child(FirebaseAuth.getInstance().
-                                                    getCurrentUser().getUid());
                                             Map<String, Object> userDetails = new HashMap<>();
                                             userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
                                             if (FirebaseAuth.getInstance().getCurrentUser().getEmail() != null) {
                                                 userDetails.put("email", FirebaseAuth.getInstance().getCurrentUser().getEmail());
                                             }
                                             if (FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber() != null) {
-                                                userDetails.put("phoneNumber", FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
+                                                userDetails.put("phoneNumber", FirebaseAuth.getInstance().getCurrentUser().
+                                                        getPhoneNumber());
                                             }
                                             if (FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl() != null) {
                                                 userDetails.put("photoURL", FirebaseAuth.getInstance().getCurrentUser().
                                                         getPhotoUrl().toString());
                                             }
-                                            currentUserReference.setValue(userDetails);
+                                            if (FirebaseAuth.getInstance().getCurrentUser().getDisplayName() != null) {
+                                                userDetails.put("name", FirebaseAuth.getInstance().getCurrentUser().
+                                                        getDisplayName().toString());
+                                            }
+                                            usersRef.child(firebaseAuth.getCurrentUser().getUid()).setValue(userDetails);
                                             retval = true;
                                             publishProgress(100);
 

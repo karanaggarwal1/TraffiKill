@@ -27,7 +27,7 @@ import java.util.Map;
 public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
     private Context context;
     private FirebaseAuth firebaseAuth;
-    private String etEmail, etPassword;
+    private String etEmail, etPassword, etName;
     private boolean retval = false;
     private String userName;
 
@@ -43,12 +43,22 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                     Toast.makeText(EmailAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
                     publishProgress(50);
                     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                    DatabaseReference ref = firebaseDatabase.getReference();
+                    DatabaseReference ref = firebaseDatabase.getReference().child("authorised");
+                    DatabaseReference userNameReference = firebaseDatabase.getReference().child("unauthorised").child("usernames");
                     DatabaseReference usersRef = ref.child("usersEmail");
-                    DatabaseReference currentUserReference = usersRef.child(EmailAuthenticator.this.userName);
+                    Map<String, String> unauthorisedData = new HashMap<>();
+                    unauthorisedData.put(EmailAuthenticator.this.userName, EmailAuthenticator.this.etEmail);
+                    userNameReference.setValue(unauthorisedData);
+                    unauthorisedData = new HashMap<>();
+                    DatabaseReference emailReference = firebaseDatabase.getReference().child("unauthorised").child("email");
+                    unauthorisedData.put(EmailAuthenticator.this.etEmail, EmailAuthenticator.this.userName);
+                    emailReference.setValue(unauthorisedData);
+                    DatabaseReference currentUserReference = usersRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid());
                     Map<String, String> userDetails = new HashMap<>();
-                    userDetails.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    userDetails.put("name", EmailAuthenticator.this.etName);
+                    userDetails.put("username", EmailAuthenticator.this.userName);
                     userDetails.put("email", EmailAuthenticator.this.etEmail);
+                    userDetails.put("verified", "false");
                     currentUserReference.setValue(userDetails);
                     retval = true;
                     publishProgress(90);
@@ -64,11 +74,9 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                         }
                     });
                     EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserActivity.class));
-                }
-                else if(task.getException() instanceof FirebaseAuthUserCollisionException){
-                    Toast.makeText(EmailAuthenticator.this.context,"User already exists",Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                    Toast.makeText(EmailAuthenticator.this.context, "User already exists", Toast.LENGTH_SHORT).show();
+                } else {
                     Log.d("EmailAuthenticator", "onComplete: " + task.getException());
                 }
             }
@@ -93,11 +101,12 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
         super.onProgressUpdate(values);
     }
 
-    public void initialise(Context context, String etEmail, String etPassword, String userName) {
+    public void initialise(Context context, String etName, String etEmail, String etPassword, String userName) {
         this.context = context;
         this.etEmail = etEmail;
         this.etPassword = etPassword;
         this.userName = userName;
+        this.etName = etName;
         this.firebaseAuth = FirebaseAuth.getInstance();
     }
 }

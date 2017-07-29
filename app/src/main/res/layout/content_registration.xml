@@ -2,13 +2,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/activity_main2">
+    android:id="@+id/activity_main2"
+    android:background="@color/colorWhite">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorWhite"
-        android:orientation="vertical">
+    <!--<LinearLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:background="@color/colorWhite"-->
+    <!--android:orientation="vertical">-->
 
 
         <LinearLayout
@@ -17,12 +18,13 @@
             android:layout_gravity="center"
             android:layout_margin="30dp"
             android:gravity="center"
+            android:background="@color/colorWhite"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="15dp"
                 android:orientation="horizontal"
                 android:weightSum="2">
 
@@ -33,6 +35,38 @@
                     android:layout_gravity="center"
                     android:layout_weight="1.75"
                     android:src="@mipmap/email" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/Name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="0.25">
+
+                    <EditText
+                        android:id="@+id/etName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:hint="Name"
+                        android:inputType="textPersonName"
+                        android:textColorHint="#c6c6c6" />
+
+                </android.support.design.widget.TextInputLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.75"
+                    android:src="@mipmap/icName" />
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/Email"
@@ -186,5 +220,5 @@
         </LinearLayout>
 
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 </ScrollView>

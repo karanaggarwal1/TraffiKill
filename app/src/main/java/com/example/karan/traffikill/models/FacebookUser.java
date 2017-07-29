@@ -1,31 +1,47 @@
 package com.example.karan.traffikill.models;
 
-public class FacebookUser {
-    private String name;
-    private String UID;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-    public FacebookUser(String name, String UID) {
-        this.name = name;
-        this.UID = UID;
+public class FacebookUser {
+    @SerializedName("name")
+    @Expose
+    private String name;
+
+    @SerializedName("uid")
+    @Expose
+    private String uid;
+
+    @SerializedName("photoURL")
+    @Expose
+    private String photoURL;
+
+    @SerializedName("email")
+    @Expose
+    private String email;
+
+    @SerializedName("phoneNumber")
+    @Expose
+    private String phoneNumber;
+
+    public String getUid() {
+        return uid;
     }
 
-    public FacebookUser(String name) {
-        this.name = name;
+    public String getPhotoURL() {
+        return photoURL;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUID() {
-        return UID;
-    }
-
-    public void setUID(String UID) {
-        this.UID = UID;
-    }
 }

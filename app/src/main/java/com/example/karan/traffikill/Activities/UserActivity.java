@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -36,7 +34,6 @@ import com.example.karan.traffikill.Services.WeatherAPI;
 import com.example.karan.traffikill.models.CurrentData;
 import com.example.karan.traffikill.models.KeyListDaily;
 import com.example.karan.traffikill.models.KeyListHourly;
-import com.example.karan.traffikill.models.UserDetails;
 import com.example.karan.traffikill.models.WeatherInfo;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -66,25 +63,20 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserActivity extends AppCompatActivity {
-    public static final int NEW_VERSION = 123;
-    public static final int NEW_USER = 234;
     public static final int PERM_REQ_CODE = 345;
     public static final int REQUEST_CHECK_SETTINGS = 456;
-    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     private static final String LAST_APP_VERSION = "1";
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     private final static String KEY_LOCATION = "location";
     private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 300000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 150000;
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 900000;
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 600000;
     private static final String TAG = "LocationUpdates";
 
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
 
-    private static AppStart appStart = null;
     public WeatherAPI weatherAPI;
-    protected UserDetails currentUserDetails;
     NavigationTabAdapter navigationTabAdapter;
     NavigationTabBar navigationTabBar;
     ViewPager viewPager;
@@ -94,7 +86,6 @@ public class UserActivity extends AppCompatActivity {
     UserProfile userProfile;
     CurrentDayForecast currentDayForecast;
     WeeklyData weeklyData;
-    SharedPreferences checkFirstTimeStart;
 
     private ImageView profileImage;
     private TextView displayName;
@@ -129,28 +120,19 @@ public class UserActivity extends AppCompatActivity {
         checkPermission(this, Manifest.permission.INTERNET);
         initUI();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection ResourceAsColor
             this.getWindow().setStatusBarColor(R.color.transparent);
-        }
-        checkFirstTimeStart = getSharedPreferences("TRAFFIKILL", MODE_PRIVATE);
-        switch (checkAppStart(this, checkFirstTimeStart)) {
-            case NORMAL:
-                break;
-            case FIRST_TIME_VERSION:
-
-
-                break;
-            case FIRST_TIME:
-
-
-                break;
-            default:
-                break;
         }
         userAuthentication = FirebaseAuth.getInstance();
         if (currentUser == null) {
             Intent loginScreen = new Intent(this, LoginActivity.class);
             startActivity(loginScreen);
             finish();
+        }
+        if (!currentUser.getProviderId().equals("facebook.com") &&
+                !currentUser.getProviderId().equals("google.com") &&
+                currentUser.isEmailVerified()) {
+
         }
         if (savedInstanceState != null) {
             updateValuesFromBundle(savedInstanceState);
@@ -307,40 +289,6 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
-    public AppStart checkAppStart(Context context, SharedPreferences sharedPreferences) {
-        PackageInfo pInfo;
-        try {
-            pInfo = context.getPackageManager().getPackageInfo(
-                    context.getPackageName(), 0);
-            int lastVersionCode = sharedPreferences.getInt(
-                    LAST_APP_VERSION, -1);
-            int currentVersionCode = pInfo.versionCode;
-            appStart = checkAppStart(currentVersionCode, lastVersionCode);
-            sharedPreferences.edit()
-                    .putInt(LAST_APP_VERSION, currentVersionCode).apply();
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.d("TraffiKill",
-                    "Unable to determine current app version from package manager. Defensively assuming normal app start.");
-        }
-        return appStart;
-    }
-
-    public AppStart checkAppStart(int currentVersionCode, int lastVersionCode) {
-        if (lastVersionCode == -1) {
-            return AppStart.FIRST_TIME;
-        } else if (lastVersionCode < currentVersionCode) {
-            return AppStart.FIRST_TIME_VERSION;
-        } else if (lastVersionCode > currentVersionCode) {
-            Log.w("TraffiKill", "Current version code (" + currentVersionCode
-                    + ") is less then the one recognized on last startup ("
-                    + lastVersionCode
-                    + "). Defensively assuming normal app start.");
-            return AppStart.NORMAL;
-        } else {
-            return AppStart.NORMAL;
-        }
-    }
-
     public void checkPermission(Context context, String perm) {
 
         if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
@@ -475,7 +423,4 @@ public class UserActivity extends AppCompatActivity {
         }, 500);
     }
 
-    public enum AppStart {
-        FIRST_TIME, FIRST_TIME_VERSION, NORMAL
-    }
 }
