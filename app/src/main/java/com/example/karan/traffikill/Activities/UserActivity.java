@@ -35,6 +35,7 @@ import com.example.karan.traffikill.models.CurrentData;
 import com.example.karan.traffikill.models.KeyListDaily;
 import com.example.karan.traffikill.models.KeyListHourly;
 import com.example.karan.traffikill.models.WeatherInfo;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -71,10 +72,12 @@ public class UserActivity extends AppCompatActivity {
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 900000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 600000;
     private static final String TAG = "LocationUpdates";
-
+    public static Location mCurrentLocation;
+    public static ArrayList<CurrentData> mCurrentData;
+    public static ArrayList<KeyListHourly> mHourlyData;
+    public static ArrayList<KeyListDaily> mDailyData;
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
-
     public WeatherAPI weatherAPI;
     NavigationTabAdapter navigationTabAdapter;
     NavigationTabBar navigationTabBar;
@@ -85,31 +88,17 @@ public class UserActivity extends AppCompatActivity {
     UserProfile userProfile;
     CurrentDayForecast currentDayForecast;
     WeeklyData weeklyData;
-
     private ImageView profileImage;
     private TextView displayName;
     private TextView displayMail;
     private boolean doubleBackToExitPressedOnce = false;
-
     private boolean mRequestingLocationUpdates = true;
-
     private String mLastUpdateTime;
-
-    private Location mCurrentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private SettingsClient settingsClient;
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
-    public static ArrayList<CurrentData> mCurrentData;
-    public static ArrayList<KeyListHourly> mHourlyData;
-    public static ArrayList<KeyListDaily> mDailyData;
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        currentUser = userAuthentication.getCurrentUser();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,22 +106,20 @@ public class UserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user);
         checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         checkPermission(this, Manifest.permission.INTERNET);
-        initUI();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //noinspection ResourceAsColor
             this.getWindow().setStatusBarColor(R.color.transparent);
         }
         userAuthentication = FirebaseAuth.getInstance();
+        currentUser = userAuthentication.getCurrentUser();
         if (currentUser == null) {
+            FirebaseAuth.getInstance().signOut();
+            LoginManager.getInstance().logOut();
             Intent loginScreen = new Intent(this, LoginActivity.class);
             startActivity(loginScreen);
             finish();
         }
-        if (!currentUser.getProviderId().equals("facebook.com") &&
-                !currentUser.getProviderId().equals("google.com") &&
-                currentUser.isEmailVerified()) {
-
-        }
+        initUI();
         if (savedInstanceState != null) {
             updateValuesFromBundle(savedInstanceState);
         } else {
@@ -335,9 +322,17 @@ public class UserActivity extends AppCompatActivity {
         nearbyRestaurants = new NearbyRestaurants();
         userProfile = new UserProfile();
         Bundle userDetails = new Bundle();
-        if (FirebaseAuth.getInstance().getCurrentUser().getProviderId().equals("facebook.com")) {
+        userAuthentication = FirebaseAuth.getInstance();
+        if (currentUser == null) {
+            Intent loginScreen = new Intent(this, LoginActivity.class);
+            loginScreen.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(loginScreen);
+            finish();
+        }
+        Log.d(TAG, "initUI: " + currentUser.getProviders().get(currentUser.getProviders().size() - 1));
+        if ((currentUser.getProviders().get(currentUser.getProviders().size() - 1)).equals("facebook.com")) {
             userDetails.putString("provider", "facebook");
-        } else if (FirebaseAuth.getInstance().getCurrentUser().getProviderId().equals("google.com")) {
+        } else if ((currentUser.getProviders().get(currentUser.getProviders().size() - 1)).equals("google.com")) {
             userDetails.putString("provider", "google");
         } else {
             userDetails.putString("provider", "email");

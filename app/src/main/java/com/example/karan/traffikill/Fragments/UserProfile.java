@@ -1,32 +1,36 @@
 package com.example.karan.traffikill.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.karan.traffikill.Activities.LoginActivity;
 import com.example.karan.traffikill.R;
-import com.example.karan.traffikill.Services.FirebaseDataAPI;
-import com.example.karan.traffikill.Views.CircleDrawable;
 import com.example.karan.traffikill.models.EmailUser;
 import com.example.karan.traffikill.models.FacebookUser;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by Karan on 28-07-2017.
@@ -38,28 +42,6 @@ public class UserProfile extends Fragment {
     private FacebookUser facebookUser;
     private View rootview;
     private EmailUser emailUser;
-
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        Bitmap bitmap = null;
-
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if (bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
 
     public Context getContext() {
         return this.context;
@@ -78,92 +60,110 @@ public class UserProfile extends Fragment {
             public void onClick(View v) {
                 Log.d(TAG, "onClick: buttonClicked");
                 FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(getContext(), LoginActivity.class));
+                Intent intent = new Intent(getContext(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                getActivity().finish();
             }
         });
-        (rootview.findViewById(R.id.iv_profile_pic)).setOnClickListener(new View.OnClickListener() {
+        (rootview.findViewById(R.id.user_profile_photo)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: Image Button Clicked");
                 //implement code to change profile picture
             }
         });
-        FirebaseDataAPI firebaseDataAPI = new FirebaseDataAPI();
         facebookUser = new FacebookUser();
         if (getArguments().getString("provider").equals("facebook")) {
-            firebaseDataAPI.getData().getFBUsers(FirebaseAuth.getInstance().getCurrentUser().getUid()).enqueue(
-                    new Callback<FacebookUser>() {
-                        @Override
-                        public void onResponse(Call<FacebookUser> call, Response<FacebookUser> response) {
-                            if (response.isSuccessful()) {
-                                facebookUser = response.body();
-                                Picasso.with(UserProfile.this.context)
-                                        .load(facebookUser.getPhotoURL())
-                                        .fit()
-                                        .placeholder(R.drawable.profile_circular_border_imageview)
-                                        .error(R.drawable.ic_error)
-                                        .into(((ImageView) rootview.findViewById(R.id.iv_profile_pic)));
-
-                                CircleDrawable circleDrawable = new CircleDrawable
-                                        (
-                                                drawableToBitmap(
-                                                        ((ImageView) rootview.findViewById(R.id.iv_profile_pic)
-                                                        ).getDrawable()),
-                                                true
-                                        );
-                                ((ImageView) rootview.findViewById(R.id.iv_profile_pic)).setImageBitmap
-                                        (drawableToBitmap(circleDrawable));
-                                ((TextView) rootview.findViewById(R.id.user_profile_name)).setText(facebookUser.getName());
-                                ((TextView) rootview.findViewById(R.id.user_profile_short_bio)).setText(
-                                        (facebookUser.getEmail() == null || facebookUser.getEmail().equals("")) ?
-                                                facebookUser.getPhoneNumber() : facebookUser.getEmail());
-
-                            } else {
-                                Log.d(TAG, "onResponse: " + response.message());
-                                Log.d(TAG, "onResponse: " + response.body());
-                                Log.d(TAG, "onResponse: " + response.errorBody());
-                                Log.d(TAG, "onResponse: " + response.code());
+            rootview.findViewById(R.id.changePassword).setVisibility(View.GONE);
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().
+                    child("authorised").
+                    child("usersFB").
+                    child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    facebookUser = dataSnapshot.getValue(FacebookUser.class);
+                    String photoUrl = "http://graph.facebook.com/" + facebookUser.getUserID() +
+                            "/picture?width=100&height=100";
+                    if (getContext() != null) {
+                        Picasso.Builder builder = new Picasso.Builder(getContext());
+                        builder.listener(new Picasso.Listener() {
+                            @Override
+                            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                    ((ImageView) (rootview.findViewById(R.id.user_profile_photo))).
+                                            setImageDrawable(getContext().getDrawable(R.drawable.ic_error));
+                                }
+                                Log.d(TAG, "onImageLoadFailed: " + exception.getCause());
                             }
-                        }
+                        });
+                        builder.downloader(new OkHttpDownloader(getContext()));
+                        builder.build().load(photoUrl).into((ImageView) (rootview.findViewById(R.id.user_profile_photo)));
+                    }
+                    ((TextView) rootview.findViewById(R.id.user_profile_name)).setText(facebookUser.getName());
+                    ((TextView) rootview.findViewById(R.id.user_profile_short_bio)).setText(
+                            (facebookUser.getEmail() == null || facebookUser.getEmail().equals("")) ?
+                                    facebookUser.getPhoneNumber() : facebookUser.getEmail());
+                }
 
-                        @Override
-                        public void onFailure(Call<FacebookUser> call, Throwable t) {
-                            Log.d(TAG, "onFailure: " + t.getCause());
-                            t.printStackTrace();
-                            Log.d(TAG, "onFailure: " + t.getMessage());
-                        }
-                    });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         } else if (getArguments().getString("provider").equals("google")) {
             //TODO: after setting up google profile
         } else {
             if (getArguments().getString("provider").equals("email")) {
-                firebaseDataAPI.getData().getEmailUsers(FirebaseAuth.getInstance().getCurrentUser().getUid()).enqueue(
-                        new Callback<EmailUser>() {
-                            @Override
-                            public void onResponse(Call<EmailUser> call, Response<EmailUser> response) {
-                                if (response.isSuccessful()) {
-                                    emailUser = response.body();
-                                    ((TextView) rootview.findViewById(R.id.user_profile_name)).setText(emailUser.getName());
-                                    ((TextView) rootview.findViewById(R.id.user_profile_short_bio)).setText(
-                                            emailUser.getEmail());
+                rootview.findViewById(R.id.changePassword).setVisibility(View.VISIBLE);
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().
+                        child("authorised").
+                        child("usersEmail").
+                        child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
-                                } else {
-                                    Log.d(TAG, "onResponse: " + response.message());
-                                    Log.d(TAG, "onResponse: " + response.body());
-                                    Log.d(TAG, "onResponse: " + response.errorBody());
-                                    Log.d(TAG, "onResponse: " + response.code());
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<EmailUser> call, Throwable t) {
-                                Log.d(TAG, "onFailure: " + t.getCause());
-                                t.printStackTrace();
-                                Log.d(TAG, "onFailure: " + t.getMessage());
-                            }
-                        });
             }
         }
+        rootview.findViewById(R.id.changePassword).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: changePasswordClicked");
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Resetting the Password will Log you Out")
+                        .setPositiveButton("Reset Password", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                rootview.findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+                                if (getArguments().getString("provider").equals("email"))
+                                    FirebaseAuth.getInstance().sendPasswordResetEmail(
+                                            FirebaseAuth.getInstance().getCurrentUser().getEmail()).
+                                            addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    Toast.makeText(getActivity(),
+                                                            "Reset Password Email Sent",
+                                                            Toast.LENGTH_SHORT).
+                                                            show();
+                                                    FirebaseAuth.getInstance().signOut();
+                                                    Intent intent = new Intent(getContext(), LoginActivity.class);
+                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                    startActivity(intent);
+                                                    getActivity().finish();
+                                                    rootview.findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+                                                }
+                                            });
+                            }
+                        })
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                return;
+                            }
+                        });
+
+                builder.show();
+            }
+        });
         return rootview;
     }
+
 }

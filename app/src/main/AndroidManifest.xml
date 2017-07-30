@@ -26,12 +26,6 @@
             android:value="@string/facebook_app_id" />
 
         <activity
-            android:name=".Activities.FirstLaunch"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".Activities.FirstVersionLaunch"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".Activities.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -44,9 +38,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.RestaurantActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".Activities.UserActivity">
+            android:name=".Activities.UserActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

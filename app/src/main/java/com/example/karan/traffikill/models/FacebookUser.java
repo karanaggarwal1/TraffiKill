@@ -1,28 +1,22 @@
 package com.example.karan.traffikill.models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
 
 public class FacebookUser {
-    @SerializedName("name")
-    @Expose
     private String name;
 
-    @SerializedName("uid")
-    @Expose
     private String uid;
 
-    @SerializedName("photoURL")
-    @Expose
     private String photoURL;
 
-    @SerializedName("email")
-    @Expose
     private String email;
 
-    @SerializedName("phoneNumber")
-    @Expose
     private String phoneNumber;
+
+    private String userID;
+
+    public String getUserID() {
+        return userID;
+    }
 
     public String getUid() {
         return uid;

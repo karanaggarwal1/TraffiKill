@@ -37,11 +37,13 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
     private ProgressBar progressBar;
     private boolean retval;
     private FirebaseAuth firebaseAuth;
+    private String userID;
 
-    public void initializor(Context context, ProgressBar progressBar, FirebaseAuth firebaseAuth) {
+    public void initializor(Context context, ProgressBar progressBar, FirebaseAuth firebaseAuth, String userID) {
         this.context = context;
         this.progressBar = progressBar;
         this.firebaseAuth = firebaseAuth;
+        this.userID = userID;
     }
 
     @Override
@@ -99,6 +101,7 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                                                 userDetails.put("name", FirebaseAuth.getInstance().getCurrentUser().
                                                         getDisplayName().toString());
                                             }
+                                            userDetails.put("userID", FacebookAuthenticator.this.userID);
                                             usersRef.child(firebaseAuth.getCurrentUser().getUid()).setValue(userDetails);
                                             retval = true;
                                             publishProgress(100);

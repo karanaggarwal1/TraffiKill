@@ -59,6 +59,8 @@ public class LoginActivity extends AppCompatActivity {
         if (target == null) {
             return false;
         } else {
+            Log.d(TAG, "isValidEmail: " + Patterns.EMAIL_ADDRESS.matcher(target).matches());
+            Log.d(TAG, "isValidEmail: " + target.toString());
             return Patterns.EMAIL_ADDRESS.matcher(target).matches();
         }
     }
@@ -86,9 +88,6 @@ public class LoginActivity extends AppCompatActivity {
         if (UserActivity.currentUser != null) {
             UserActivity.userAuthentication.signOut();
             LoginManager.getInstance().logOut();
-        }
-        if (UserActivity.userAuthentication.getCurrentUser() != null) {
-            startActivity(new Intent(this, UserActivity.class));
         }
 
         etUsername = (EditText) findViewById(R.id.tvUsername);
@@ -153,7 +152,10 @@ public class LoginActivity extends AppCompatActivity {
                     public void onSuccess(LoginResult loginResult) {
                         FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
                         progressBar.setVisibility(View.VISIBLE);
-                        facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication);
+
+                        facebookAuthenticator.initializor(LoginActivity.this, progressBar,
+                                UserActivity.userAuthentication,
+                                loginResult.getAccessToken().getUserId());
                         facebookAuthenticator.execute(loginResult.getAccessToken());
                     }
 
@@ -230,7 +232,8 @@ public class LoginActivity extends AppCompatActivity {
                             public void onSuccess(LoginResult loginResult) {
                                 FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
                                 progressBar.setVisibility(View.VISIBLE);
-                                facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication);
+                                facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication,
+                                        loginResult.getAccessToken().toString());
                                 facebookAuthenticator.execute(loginResult.getAccessToken());
                             }
 

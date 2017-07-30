@@ -24,7 +24,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="90dp"
             android:orientation="horizontal"
             android:weightSum="2">
 
@@ -33,7 +33,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center"
                 android:layout_weight="1.75"
-                android:src="@mipmap/icName" />
+                android:src="@mipmap/icname" />
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/Name"
@@ -193,9 +193,9 @@
 
         <ProgressBar
             android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyle"
+            style="?android:attr/progressBarStyleLarge"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
             android:visibility="invisible" />
 
         <LinearLayout
