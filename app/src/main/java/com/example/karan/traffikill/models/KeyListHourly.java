@@ -29,18 +29,18 @@ public class KeyListHourly implements Parcelable {
     public String summary;
     @SerializedName("data")
     @Expose
-    public ArrayList<DataItemsHourly> data;
+    public ArrayList<CurrentData> data;
 
     public KeyListHourly(Parcel parcel) {
         this.summary = parcel.readString();
-        parcel.readTypedList(this.data, DataItemsHourly.CREATOR);
+        parcel.readTypedList(this.data, CurrentData.CREATOR);
     }
 
     public String getSummary() {
         return summary;
     }
 
-    public ArrayList<DataItemsHourly> getData() {
+    public ArrayList<CurrentData> getData() {
         return data;
     }
 

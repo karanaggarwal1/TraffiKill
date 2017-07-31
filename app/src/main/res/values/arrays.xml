@@ -10,5 +10,8 @@
         <item>#56342e</item>
         <item>#8c9f58</item>
     </string-array>
-
+    <string-array name="titles">
+        <item>TODAY</item>
+        <item>THIS WEEK</item>
+    </string-array>
 </resources>

@@ -38,9 +38,15 @@ public class CurrentData implements Parcelable {
     @SerializedName("dewPoint")
     @Expose
     private String dewPoint;
+    @SerializedName("icon")
+    @Expose
+    private String icon;
+    @SerializedName("temperature")
+    @Expose
+    private double temperature;
 
     public CurrentData(Parcel in) {
-        String[] data = new String[6];
+        String[] data = new String[8];
 
         in.readStringArray(data);
         // the order needs to be the same as in writeToParcel() method
@@ -50,6 +56,16 @@ public class CurrentData implements Parcelable {
         this.precipProbability = data[3];
         this.humidity = data[4];
         this.dewPoint = data[5];
+        this.icon = data[6];
+        this.temperature = Double.parseDouble(data[7]);
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public double getTemperature() {
+        return temperature;
     }
 
     public String getTime() {
@@ -88,6 +104,8 @@ public class CurrentData implements Parcelable {
                 this.precipIntensity,
                 this.precipProbability,
                 this.humidity,
-                this.dewPoint});
+                this.dewPoint,
+                this.icon,
+                this.temperature + ""});
     }
 }

@@ -18,13 +18,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.Adapters.NavigationTabAdapter;
 import com.example.karan.traffikill.Fragments.AboutApp;
-import com.example.karan.traffikill.Fragments.CurrentDayForecast;
 import com.example.karan.traffikill.Fragments.NearbyHotels;
 import com.example.karan.traffikill.Fragments.NearbyRestaurants;
 import com.example.karan.traffikill.Fragments.UserProfile;
@@ -32,7 +29,6 @@ import com.example.karan.traffikill.Fragments.WeeklyData;
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.Services.WeatherAPI;
 import com.example.karan.traffikill.models.CurrentData;
-import com.example.karan.traffikill.models.DataItemsHourly;
 import com.example.karan.traffikill.models.KeyListDaily;
 import com.example.karan.traffikill.models.WeatherInfo;
 import com.facebook.login.LoginManager;
@@ -66,15 +62,12 @@ import retrofit2.Response;
 public class UserActivity extends AppCompatActivity {
     public static final int PERM_REQ_CODE = 345;
     public static final int REQUEST_CHECK_SETTINGS = 456;
-    private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
-    private final static String KEY_LOCATION = "location";
-    private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 900000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 600000;
     private static final String TAG = "LocationUpdates";
     public static Location mCurrentLocation;
     public static ArrayList<CurrentData> mCurrentData;
-    public static ArrayList<DataItemsHourly> mHourlyData;
+    public static ArrayList<CurrentData> mHourlyData;
     public static ArrayList<KeyListDaily> mDailyData;
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
@@ -87,11 +80,7 @@ public class UserActivity extends AppCompatActivity {
     AboutApp aboutApp;
     UserProfile userProfile;
     Bundle weeklyForecastArguments = new Bundle();
-    CurrentDayForecast currentDayForecast;
     WeeklyData weeklyData;
-    private ImageView profileImage;
-    private TextView displayName;
-    private TextView displayMail;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean mRequestingLocationUpdates = true;
     private String mLastUpdateTime;
@@ -122,9 +111,9 @@ public class UserActivity extends AppCompatActivity {
         }
         initUI();
 
-        this.mDailyData = new ArrayList<>();
-        this.mHourlyData = new ArrayList<>();
-        this.mCurrentData = new ArrayList<>();
+        UserActivity.mDailyData = new ArrayList<>();
+        UserActivity.mHourlyData = new ArrayList<>();
+        UserActivity.mCurrentData = new ArrayList<>();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
@@ -146,15 +135,10 @@ public class UserActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
                                 Log.d(TAG, "onResponse: " + response.isSuccessful());
-                                UserActivity.this.mCurrentData.add(response.body().getCurrently());
+                                UserActivity.mCurrentData.add(response.body().getCurrently());
                                 Log.d(TAG, "onResponse: " + response.body().getCurrently().getSummary());
-                                UserActivity.this.mHourlyData.addAll(response.body().getHourly().getData());
-                                weeklyData.updateList(response.body().getHourly().getData());
-                                Log.d(TAG, "onResponse: " + response.body().getHourly().getSummary());
-                                UserActivity.this.mDailyData.add(response.body().getDaily());
-                                Log.d(TAG, "onResponse: " + response.body().getDaily().getSummary());
-                                Log.d(TAG, "onResponse: Time" + response.body().getHourly().getData().get(0).getTime());
-
+                                UserActivity.mCurrentData.addAll(response.body().getHourly().getData());
+                                weeklyData.updateList(UserActivity.mCurrentData, "currently");
                             }
 
                             @Override
@@ -163,7 +147,21 @@ public class UserActivity extends AppCompatActivity {
                                 Log.d(TAG, "onFailure: " + t.getCause());
                             }
                         });
+                weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), "hourly").
+                        enqueue(new Callback<WeatherInfo>() {
+                            @Override
+                            public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
+                                if (response.isSuccessful()) {
+                                    UserActivity.this.mHourlyData.addAll(response.body().getHourly().data);
+                                    weeklyData.updateList(UserActivity.this.mCurrentData, "hourly");
+                                }
+                            }
 
+                            @Override
+                            public void onFailure(Call<WeatherInfo> call, Throwable t) {
+
+                            }
+                        });
                 Log.d(TAG, "onLocationResult: ");
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                 Log.d(TAG, "onLocationResult: " + mLastUpdateTime);
@@ -213,7 +211,8 @@ public class UserActivity extends AppCompatActivity {
                     public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                         if (ActivityCompat.checkSelfPermission(UserActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                                 PackageManager.PERMISSION_GRANTED &&
-                                ActivityCompat.checkSelfPermission(UserActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.checkSelfPermission(UserActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                                        PackageManager.PERMISSION_GRANTED) {
                             return;
                         }
                         fusedLocationProviderClient.requestLocationUpdates(locationRequest,
@@ -230,7 +229,7 @@ public class UserActivity extends AppCompatActivity {
                                     ResolvableApiException rae = (ResolvableApiException) e;
                                     rae.startResolutionForResult(UserActivity.this, REQUEST_CHECK_SETTINGS);
                                 } catch (IntentSender.SendIntentException sie) {
-
+                                    Log.d(TAG, "onFailure: " + sie.getCause());
                                 }
                                 break;
                             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -246,6 +245,9 @@ public class UserActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        UserActivity.mCurrentData = new ArrayList<>();
+        UserActivity.mDailyData = new ArrayList<>();
+        UserActivity.mHourlyData = new ArrayList<>();
         stopLocationUpdates();
     }
 
@@ -287,9 +289,9 @@ public class UserActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         //cache clearing
-        this.mCurrentData = new ArrayList<>();
-        this.mDailyData = new ArrayList<>();
-        this.mHourlyData = new ArrayList<>();
+        UserActivity.mCurrentData = new ArrayList<>();
+        UserActivity.mDailyData = new ArrayList<>();
+        UserActivity.mHourlyData = new ArrayList<>();
         super.onDestroy();
     }
 
@@ -298,9 +300,10 @@ public class UserActivity extends AppCompatActivity {
         navigationTabAdapter = new NavigationTabAdapter(getSupportFragmentManager());
         aboutApp = new AboutApp();
         weeklyData = new WeeklyData();
-        weeklyForecastArguments.putParcelableArrayList("dataList", UserActivity.mHourlyData);
+        weeklyForecastArguments.putParcelableArrayList("dataListHourly", UserActivity.mHourlyData);
+        weeklyForecastArguments.putParcelableArrayList("dataListCurrently", UserActivity.mCurrentData);
+        weeklyData.setContext(this);
         weeklyData.setArguments(weeklyForecastArguments);
-        currentDayForecast = new CurrentDayForecast();
         nearbyHotels = new NearbyHotels();
         nearbyRestaurants = new NearbyRestaurants();
         userProfile = new UserProfile();
@@ -322,10 +325,9 @@ public class UserActivity extends AppCompatActivity {
         }
         userProfile.setArguments(userDetails);
         userProfile.setContext(this);
-        navigationTabAdapter.addFragment(currentDayForecast);
         navigationTabAdapter.addFragment(weeklyData);
-        navigationTabAdapter.addFragment(userProfile);
         navigationTabAdapter.addFragment(nearbyRestaurants);
+        navigationTabAdapter.addFragment(userProfile);
         navigationTabAdapter.addFragment(nearbyHotels);
         navigationTabAdapter.addFragment(aboutApp);
         viewPager.setAdapter(navigationTabAdapter);
@@ -334,18 +336,20 @@ public class UserActivity extends AppCompatActivity {
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_first),
-                        Color.parseColor(colors[0]))
-                        .selectedIcon(getResources().getDrawable(R.drawable.ic_first))
-                        .title("Forecast")
-                        .build()
-        );
-        models.add(
-                new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.ic_second),
                         Color.parseColor(colors[0]))
                         .selectedIcon(getResources().getDrawable(R.drawable.ic_second))
-                        .title("This Week")
+                        .title("Forecast")
+                        .build()
+        );
+
+
+        models.add(
+                new NavigationTabBar.Model.Builder(
+                        getResources().getDrawable(R.drawable.ic_third),
+                        Color.parseColor(colors[1]))
+                        .selectedIcon(getResources().getDrawable(R.drawable.ic_third))
+                        .title("Restaurants")
                         .build()
         );
         models.add(
@@ -354,14 +358,6 @@ public class UserActivity extends AppCompatActivity {
                         Color.parseColor(colors[3]))
                         .selectedIcon(getResources().getDrawable(R.drawable.ic_fifth))
                         .title("Profile")
-                        .build()
-        );
-        models.add(
-                new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.ic_third),
-                        Color.parseColor(colors[1]))
-                        .selectedIcon(getResources().getDrawable(R.drawable.ic_third))
-                        .title("Restaurants")
                         .build()
         );
         models.add(
