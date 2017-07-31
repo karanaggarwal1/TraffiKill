@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/backgroundContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="10"
-    android:id="@+id/backgroundContainer">
+    android:weightSum="10">
 
     <RelativeLayout
         android:id="@+id/weatherPreview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="6.2"
-        android:visibility="visible">
+        android:visibility="invisible">
 
-        <TextView
+        <com.example.karan.traffikill.CustomViews.CustomTextView
             android:id="@+id/tvTempBig"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             android:layout_toStartOf="@+id/tvSummary"
             app:srcCompat="@drawable/cloudy_icon" />
 
-        <TextView
+        <com.example.karan.traffikill.CustomViews.CustomTextView
             android:id="@+id/tvSummary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
             android:textColor="@color/colorWhite"
             android:textSize="18sp" />
 
-        <TextView
+        <com.example.karan.traffikill.CustomViews.CustomTextView
             android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:text="01:07 AM"
             android:textColor="@color/colorWhite" />
 
-        <TextView
+        <com.example.karan.traffikill.CustomViews.CustomTextView
             android:id="@+id/tvProbability"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -69,7 +69,7 @@
             android:textColor="@color/colorWhite"
             android:textSize="16sp" />
 
-        <TextView
+        <com.example.karan.traffikill.CustomViews.CustomTextView
             android:id="@+id/tvHumidity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -79,15 +79,15 @@
             android:text="Humidity = 16%"
             android:textColor="@color/colorWhite" />
 
-        <TextView
+        <com.example.karan.traffikill.CustomViews.CustomTextView
             android:id="@+id/tvPrecipIntensity"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvHumidity"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="24dp"
-            android:textAlignment="center"
             android:text="Precipitation Intensity = 0.002"
+            android:textAlignment="center"
             android:textColor="@color/colorWhite" />
 
     </RelativeLayout>

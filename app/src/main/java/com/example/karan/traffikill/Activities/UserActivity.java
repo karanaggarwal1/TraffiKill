@@ -27,9 +27,12 @@ import com.example.karan.traffikill.Fragments.NearbyRestaurants;
 import com.example.karan.traffikill.Fragments.UserProfile;
 import com.example.karan.traffikill.Fragments.WeeklyData;
 import com.example.karan.traffikill.R;
+import com.example.karan.traffikill.Services.NearbyPlacesAPI;
 import com.example.karan.traffikill.Services.WeatherAPI;
 import com.example.karan.traffikill.models.CurrentData;
 import com.example.karan.traffikill.models.KeyListDaily;
+import com.example.karan.traffikill.models.NearbyPlaces;
+import com.example.karan.traffikill.models.ResultData;
 import com.example.karan.traffikill.models.WeatherInfo;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.api.ApiException;
@@ -69,6 +72,7 @@ public class UserActivity extends AppCompatActivity {
     public static ArrayList<CurrentData> mCurrentData;
     public static ArrayList<CurrentData> mHourlyData;
     public static ArrayList<KeyListDaily> mDailyData;
+    public static ArrayList<ResultData> nearbyPlaces;
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
     public WeatherAPI weatherAPI;
@@ -79,7 +83,7 @@ public class UserActivity extends AppCompatActivity {
     NearbyRestaurants nearbyRestaurants;
     AboutApp aboutApp;
     UserProfile userProfile;
-    Bundle weeklyForecastArguments = new Bundle();
+    Bundle weeklyForecastArguments = new Bundle(), restaurantArguments = new Bundle();
     WeeklyData weeklyData;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean mRequestingLocationUpdates = true;
@@ -114,12 +118,32 @@ public class UserActivity extends AppCompatActivity {
         UserActivity.mDailyData = new ArrayList<>();
         UserActivity.mHourlyData = new ArrayList<>();
         UserActivity.mCurrentData = new ArrayList<>();
-
+        UserActivity.nearbyPlaces = new ArrayList<>();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+    }
+
+    private void getNearbyPlaces() {
+        NearbyPlacesAPI nearbyPlacesAPI = new NearbyPlacesAPI();
+        nearbyPlacesAPI.getNearbyPlacesClient().getNearbyPlaces(mCurrentLocation.getLatitude() + "," +
+                        mCurrentLocation.getLongitude(),
+                "restaurants").enqueue(new Callback<NearbyPlaces>() {
+            @Override
+            public void onResponse(Call<NearbyPlaces> call, Response<NearbyPlaces> response) {
+                if (response.isSuccessful()) {
+                    UserActivity.nearbyPlaces.addAll(response.body().getResults());
+                    UserActivity.this.nearbyHotels.updateList(UserActivity.nearbyPlaces);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NearbyPlaces> call, Throwable t) {
+
+            }
+        });
     }
 
     private void createLocationCallback() {
@@ -129,6 +153,7 @@ public class UserActivity extends AppCompatActivity {
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
                 Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLatitude() + "::" + mCurrentLocation.getLongitude());
+                getNearbyPlaces();
                 weatherAPI = new WeatherAPI();
                 weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()).
                         enqueue(new Callback<WeatherInfo>() {
@@ -306,6 +331,8 @@ public class UserActivity extends AppCompatActivity {
         weeklyData.setArguments(weeklyForecastArguments);
         nearbyHotels = new NearbyHotels();
         nearbyRestaurants = new NearbyRestaurants();
+        restaurantArguments.putParcelableArrayList("dataList", UserActivity.nearbyPlaces);
+        nearbyRestaurants.setArguments(restaurantArguments);
         userProfile = new UserProfile();
         Bundle userDetails = new Bundle();
         userAuthentication = FirebaseAuth.getInstance();

@@ -125,7 +125,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                         e.printStackTrace();
                     }
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTempBig))).
-                            setText(WeatherItemsAdapter.this.currentList.get(x).getTemperature() + "°C");
+                            setText(WeatherItemsAdapter.this.currentList.get(x).getTemperature() + " °C");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvSummary))).
                             setText(WeatherItemsAdapter.this.currentList.get(x).getSummary());
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTime))).
@@ -172,6 +172,9 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                     }
                     try {
                         if (d.after(format.parse(formatted + " " + "7:00 PM")) && d.before(format.parse(formatted + " " + "5:00 AM"))) {
+                            if (d.before(format.parse(formatted + " " + "11:59 PM")) ||
+                                    (d.after(format.parse(formatted + " 12:00 AM")) &&
+                                            d.before(format.parse(formatted + " 5:00 AM"))))
                             WeatherItemsAdapter.this.view.setBackgroundResource(R.drawable.night_sky);
                         } else {
                             WeatherItemsAdapter.this.view.setBackgroundResource(R.drawable.clear_sky);

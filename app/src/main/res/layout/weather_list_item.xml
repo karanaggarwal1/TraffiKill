@@ -19,7 +19,7 @@
             android:layout_weight="1.74"
             android:orientation="vertical">
 
-            <TextView
+            <com.example.karan.traffikill.CustomViews.CustomTextView
                 android:id="@+id/tvTempValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
                 android:layout_centerVertical="true"
                 android:src="@drawable/cloudy_icon" />
 
-            <TextView
+            <com.example.karan.traffikill.CustomViews.CustomTextView
                 android:id="@+id/tvTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

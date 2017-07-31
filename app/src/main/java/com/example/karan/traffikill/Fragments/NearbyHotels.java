@@ -7,6 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.karan.traffikill.R;
+import com.example.karan.traffikill.models.ResultData;
+
+import java.util.ArrayList;
 
 /**
  * Created by Karan on 28-07-2017.
@@ -19,4 +22,8 @@ public class NearbyHotels extends Fragment{
 
             return rootview;
         }
+
+    public void updateList(ArrayList<ResultData> nearbyPlaces) {
+
+    }
 }
