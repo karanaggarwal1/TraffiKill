@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -31,13 +31,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.truizlop.fabreveallayout.FABRevealLayout;
 import com.truizlop.fabreveallayout.OnRevealChangeListener;
 
@@ -89,13 +83,26 @@ public class LoginActivity extends AppCompatActivity {
             UserActivity.userAuthentication.signOut();
             LoginManager.getInstance().logOut();
         }
+        setupMainScreen((CardView) findViewById(R.id.content_login));
+    }
 
-        etUsername = (EditText) findViewById(R.id.tvUsername);
-        etPassword = (EditText) findViewById(R.id.tvPassword);
-        progressBar = (ProgressBar) findViewById(R.id.determinateBar);
-        btnSignIn = (Button) findViewById(R.id.btnSignIn);
-        fbloginButton = (ImageView) findViewById(R.id.fbLoginButton);
+    public void checkPermission(Context context, String perm) {
+        //TODO: Implement a permission driven interface in other activities as well
+        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
+        }
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
+            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    public void setupMainScreen(View mainView) {
+        etUsername = (EditText) mainView.findViewById(R.id.tvUsername);
+        etPassword = (EditText) mainView.findViewById(R.id.tvPassword);
+        progressBar = (ProgressBar) mainView.findViewById(R.id.determinateBar);
+        btnSignIn = (Button) mainView.findViewById(R.id.btnSignIn);
+        fbloginButton = (ImageView) mainView.findViewById(R.id.fbLoginButton);
+        Log.d(TAG, "onMainViewAppeared: " + mainView.getId());
         progressBar.setVisibility(View.INVISIBLE);
         btnSignIn.setClickable(true);
         btnSignIn.setOnClickListener(new View.OnClickListener() {
@@ -104,47 +111,22 @@ public class LoginActivity extends AppCompatActivity {
                 Log.d(TAG, "onClick: ButtonClicked");
                 if (UserActivity.userAuthentication.getCurrentUser() != null) {
                     UserActivity.userAuthentication.signOut();
+                    LoginManager.getInstance().logOut();
                     UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
                             etPassword.getText().toString());
                 } else {
-                    progressBar.setVisibility(View.VISIBLE);
-                    progressBar.setProgress(0);
                     UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
-                            etPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                progressBar.setProgress(100);
-                                progressBar.setVisibility(View.INVISIBLE);
-                                startActivity(new Intent(LoginActivity.this, UserActivity.class));
-                            } else {
-                                Log.d(TAG, "onComplete: " + task.getException());
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            if (e instanceof FirebaseAuthInvalidUserException) {
-                                progressBar.setProgress(100);
-                                progressBar.setVisibility(View.INVISIBLE);
-                                Toast.makeText(LoginActivity.this, "User doesn't exist", Toast.LENGTH_SHORT).show();
-                            } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                                progressBar.setProgress(100);
-                                progressBar.setVisibility(View.INVISIBLE);
-                                Toast.makeText(LoginActivity.this, "Incorrect Password", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Log.d(TAG, "onFailure: " + e.getCause());
-                            }
-                        }
-                    });
+                            etPassword.getText().toString());
+                    if (UserActivity.userAuthentication.getCurrentUser() != null)
+                        startActivity(new Intent(LoginActivity.this, UserActivity.class));
                 }
             }
         });
-        fbloginButton.setClickable(true);
         fbloginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Button Clicked");
+                LoginManager.getInstance().logOut();
                 LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this,
                         Arrays.asList("public_profile", "user_friends, email"));
                 LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -152,10 +134,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onSuccess(LoginResult loginResult) {
                         FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
                         progressBar.setVisibility(View.VISIBLE);
-
-                        facebookAuthenticator.initializor(LoginActivity.this, progressBar,
-                                UserActivity.userAuthentication,
-                                loginResult.getAccessToken().getUserId());
+                        facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication,
+                                loginResult.getAccessToken().toString());
                         facebookAuthenticator.execute(loginResult.getAccessToken());
                     }
 
@@ -173,16 +153,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public void checkPermission(Context context, String perm) {
-        //TODO: Implement a permission driven interface in other activities as well
-        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
-        }
-        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
-            Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -194,61 +164,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onMainViewAppeared(FABRevealLayout fabRevealLayout, View mainView) {
                 cancel.setVisibility(View.GONE);
-
-                etUsername = (EditText) mainView.findViewById(R.id.tvUsername);
-                etPassword = (EditText) mainView.findViewById(R.id.tvPassword);
-                progressBar = (ProgressBar) mainView.findViewById(R.id.determinateBar);
-                btnSignIn = (Button) mainView.findViewById(R.id.btnSignIn);
-                fbloginButton = (ImageView) mainView.findViewById(R.id.fbLoginButton);
-                Log.d(TAG, "onMainViewAppeared: " + mainView.getId());
-                progressBar.setVisibility(View.INVISIBLE);
-                btnSignIn.setClickable(true);
-                btnSignIn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d(TAG, "onClick: ButtonClicked");
-                        if (UserActivity.userAuthentication.getCurrentUser() != null) {
-                            UserActivity.userAuthentication.signOut();
-                            LoginManager.getInstance().logOut();
-                            UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
-                                    etPassword.getText().toString());
-                        } else {
-                            UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
-                                    etPassword.getText().toString());
-                            if (UserActivity.userAuthentication.getCurrentUser() != null)
-                                startActivity(new Intent(LoginActivity.this, UserActivity.class));
-                        }
-                    }
-                });
-                fbloginButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Log.d(TAG, "onClick: Button Clicked");
-                        LoginManager.getInstance().logOut();
-                        LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this,
-                                Arrays.asList("public_profile", "user_friends, email"));
-                        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-                            @Override
-                            public void onSuccess(LoginResult loginResult) {
-                                FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
-                                progressBar.setVisibility(View.VISIBLE);
-                                facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication,
-                                        loginResult.getAccessToken().toString());
-                                facebookAuthenticator.execute(loginResult.getAccessToken());
-                            }
-
-                            @Override
-                            public void onCancel() {
-                                Toast.makeText(LoginActivity.this, "Operation was Cancelled", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onError(FacebookException error) {
-                                Log.d(TAG, "onError: " + error.getCause());
-                            }
-                        });
-                    }
-                });
+                setupMainScreen(mainView);
             }
 
             @Override

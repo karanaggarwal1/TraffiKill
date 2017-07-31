@@ -28,6 +28,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.squareup.picasso:picasso:2.3.2'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.daprlabs.aaron:cardstack:0.1.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'

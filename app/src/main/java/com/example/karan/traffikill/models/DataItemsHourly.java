@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class DataItemsHourly implements Parcelable {
-
+    //    "dewPoint": 54.24,
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public DataItemsHourly createFromParcel(Parcel in) {
             return new DataItemsHourly(in);
@@ -37,6 +37,18 @@ public class DataItemsHourly implements Parcelable {
     @Expose
     public String humidity;
 
+    @SerializedName("dewPoint")
+    @Expose
+    public double dewPoint;
+
+    @SerializedName("temperature")
+    @Expose
+    public double temperature;
+
+    public double getTemperature() {
+        return temperature;
+    }
+
     public DataItemsHourly(Parcel in) {
         String[] data = new String[5];
 
@@ -47,6 +59,10 @@ public class DataItemsHourly implements Parcelable {
         this.precipProbability = data[2];
         this.summary = data[3];
         this.humidity = data[4];
+    }
+
+    public double getDewPoint() {
+        return dewPoint;
     }
 
     public String getTime() {

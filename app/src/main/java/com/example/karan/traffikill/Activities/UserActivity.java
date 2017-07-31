@@ -32,8 +32,8 @@ import com.example.karan.traffikill.Fragments.WeeklyData;
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.Services.WeatherAPI;
 import com.example.karan.traffikill.models.CurrentData;
+import com.example.karan.traffikill.models.DataItemsHourly;
 import com.example.karan.traffikill.models.KeyListDaily;
-import com.example.karan.traffikill.models.KeyListHourly;
 import com.example.karan.traffikill.models.WeatherInfo;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.api.ApiException;
@@ -74,7 +74,7 @@ public class UserActivity extends AppCompatActivity {
     private static final String TAG = "LocationUpdates";
     public static Location mCurrentLocation;
     public static ArrayList<CurrentData> mCurrentData;
-    public static ArrayList<KeyListHourly> mHourlyData;
+    public static ArrayList<DataItemsHourly> mHourlyData;
     public static ArrayList<KeyListDaily> mDailyData;
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
@@ -86,6 +86,7 @@ public class UserActivity extends AppCompatActivity {
     NearbyRestaurants nearbyRestaurants;
     AboutApp aboutApp;
     UserProfile userProfile;
+    Bundle weeklyForecastArguments = new Bundle();
     CurrentDayForecast currentDayForecast;
     WeeklyData weeklyData;
     private ImageView profileImage;
@@ -120,13 +121,11 @@ public class UserActivity extends AppCompatActivity {
             finish();
         }
         initUI();
-        if (savedInstanceState != null) {
-            updateValuesFromBundle(savedInstanceState);
-        } else {
-            this.mDailyData = new ArrayList<>();
-            this.mHourlyData = new ArrayList<>();
-            this.mCurrentData = new ArrayList<>();
-        }
+
+        this.mDailyData = new ArrayList<>();
+        this.mHourlyData = new ArrayList<>();
+        this.mCurrentData = new ArrayList<>();
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
         createLocationCallback();
@@ -149,10 +148,13 @@ public class UserActivity extends AppCompatActivity {
                                 Log.d(TAG, "onResponse: " + response.isSuccessful());
                                 UserActivity.this.mCurrentData.add(response.body().getCurrently());
                                 Log.d(TAG, "onResponse: " + response.body().getCurrently().getSummary());
-                                UserActivity.this.mHourlyData.add(response.body().getHourly());
+                                UserActivity.this.mHourlyData.addAll(response.body().getHourly().getData());
+                                weeklyData.updateList(response.body().getHourly().getData());
                                 Log.d(TAG, "onResponse: " + response.body().getHourly().getSummary());
                                 UserActivity.this.mDailyData.add(response.body().getDaily());
                                 Log.d(TAG, "onResponse: " + response.body().getDaily().getSummary());
+                                Log.d(TAG, "onResponse: Time" + response.body().getHourly().getData().get(0).getTime());
+
                             }
 
                             @Override
@@ -161,6 +163,8 @@ public class UserActivity extends AppCompatActivity {
                                 Log.d(TAG, "onFailure: " + t.getCause());
                             }
                         });
+
+                Log.d(TAG, "onLocationResult: ");
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                 Log.d(TAG, "onLocationResult: " + mLastUpdateTime);
             }
@@ -251,29 +255,6 @@ public class UserActivity extends AppCompatActivity {
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(KEY_REQUESTING_LOCATION_UPDATES, mRequestingLocationUpdates);
-        savedInstanceState.putParcelable(KEY_LOCATION, mCurrentLocation);
-        savedInstanceState.putString(KEY_LAST_UPDATED_TIME_STRING, mLastUpdateTime);
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
-    private void updateValuesFromBundle(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            if (savedInstanceState.keySet().contains(KEY_REQUESTING_LOCATION_UPDATES)) {
-                mRequestingLocationUpdates = savedInstanceState.getBoolean(
-                        KEY_REQUESTING_LOCATION_UPDATES);
-            }
-
-            if (savedInstanceState.keySet().contains(KEY_LOCATION)) {
-                mCurrentLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-            }
-
-            if (savedInstanceState.keySet().contains(KEY_LAST_UPDATED_TIME_STRING)) {
-                mLastUpdateTime = savedInstanceState.getString(KEY_LAST_UPDATED_TIME_STRING);
-            }
-        }
-    }
 
     public void checkPermission(Context context, String perm) {
 
@@ -317,6 +298,8 @@ public class UserActivity extends AppCompatActivity {
         navigationTabAdapter = new NavigationTabAdapter(getSupportFragmentManager());
         aboutApp = new AboutApp();
         weeklyData = new WeeklyData();
+        weeklyForecastArguments.putParcelableArrayList("dataList", UserActivity.mHourlyData);
+        weeklyData.setArguments(weeklyForecastArguments);
         currentDayForecast = new CurrentDayForecast();
         nearbyHotels = new NearbyHotels();
         nearbyRestaurants = new NearbyRestaurants();

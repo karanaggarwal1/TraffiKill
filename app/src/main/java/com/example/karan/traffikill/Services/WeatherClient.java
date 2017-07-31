@@ -11,6 +11,6 @@ import retrofit2.http.Path;
  */
 
 public interface WeatherClient {
-    @GET("{latitude},{longitude}/?units=si&exclude=minutely,flags")
+    @GET("{latitude},{longitude}/?units=si&exclude=minutely,flags&extend=hourly")
     Call<WeatherInfo> getWeatherInfo(@Path("latitude") double Latitude, @Path("longitude") double Longitude);
 }
