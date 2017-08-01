@@ -43,8 +43,9 @@ public class NearbyPlaceAdapter extends RecyclerView.Adapter<NearbyPlaceAdapter.
     public void onBindViewHolder(NearbyPlaceHolder holder, final int position) {
         Picasso.with(context)
                 .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key=AIzaSyCcWcxyuUpiemoDQzHGzJx-yd5jW0Pwt14" +
-                        "&photoreference=" +
-                        this.itemList.get(position).getPhotosData().get(0).getPhotoReference())
+                        "&maxwidth=260&photoreference=" +
+                        (this.itemList.get(position).getPhotosData() != null ?
+                                this.itemList.get(position).getPhotosData().get(0).getPhotoReference() : ""))
                 .fit()
                 .placeholder(R.drawable.ic_placeholder)
                 .error(R.drawable.ic_error)

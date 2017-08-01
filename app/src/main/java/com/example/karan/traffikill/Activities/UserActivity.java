@@ -72,7 +72,8 @@ public class UserActivity extends AppCompatActivity {
     public static ArrayList<CurrentData> mCurrentData;
     public static ArrayList<CurrentData> mHourlyData;
     public static ArrayList<KeyListDaily> mDailyData;
-    public static ArrayList<ResultData> nearbyPlaces;
+    public static ArrayList<ResultData> nearbyRestaurantList;
+    public static ArrayList<ResultData> nearbyHotelList;
     protected static FirebaseAuth userAuthentication;
     protected static FirebaseUser currentUser;
     public WeatherAPI weatherAPI;
@@ -83,7 +84,7 @@ public class UserActivity extends AppCompatActivity {
     NearbyRestaurants nearbyRestaurants;
     AboutApp aboutApp;
     UserProfile userProfile;
-    Bundle weeklyForecastArguments = new Bundle(), restaurantArguments = new Bundle();
+    Bundle weeklyForecastArguments = new Bundle(), restaurantArguments = new Bundle(), hotelArguments = new Bundle();
     WeeklyData weeklyData;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean mRequestingLocationUpdates = true;
@@ -93,6 +94,7 @@ public class UserActivity extends AppCompatActivity {
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
+//    private String x;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +120,8 @@ public class UserActivity extends AppCompatActivity {
         UserActivity.mDailyData = new ArrayList<>();
         UserActivity.mHourlyData = new ArrayList<>();
         UserActivity.mCurrentData = new ArrayList<>();
-        UserActivity.nearbyPlaces = new ArrayList<>();
+        UserActivity.nearbyRestaurantList = new ArrayList<>();
+        UserActivity.nearbyHotelList = new ArrayList<>();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
         createLocationCallback();
@@ -126,24 +129,48 @@ public class UserActivity extends AppCompatActivity {
         buildLocationSettingsRequest();
     }
 
-    private void getNearbyPlaces() {
+    private void getNearbyPlaces(String type) {
+        final String x = type;
         NearbyPlacesAPI nearbyPlacesAPI = new NearbyPlacesAPI();
-        nearbyPlacesAPI.getNearbyPlacesClient().getNearbyPlaces(mCurrentLocation.getLatitude() + "," +
-                        mCurrentLocation.getLongitude(),
-                "restaurants").enqueue(new Callback<NearbyPlaces>() {
-            @Override
-            public void onResponse(Call<NearbyPlaces> call, Response<NearbyPlaces> response) {
-                if (response.isSuccessful()) {
-                    UserActivity.nearbyPlaces.addAll(response.body().getResults());
-                    UserActivity.this.nearbyHotels.updateList(UserActivity.nearbyPlaces);
-                }
-            }
+        String location = mCurrentLocation.getLatitude() + "," +
+                mCurrentLocation.getLongitude();
+        nearbyPlacesAPI.getNearbyPlacesClient().getNearbyPlaces(
+                location,
+                type,
+                50000)
+                .enqueue(new Callback<NearbyPlaces>() {
+                    @Override
+                    public void onResponse(Call<NearbyPlaces> call, Response<NearbyPlaces> response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "onResponse: " + response.errorBody());
+                            Log.d(TAG, "onResponse: " + response.body().getResults().get(0).getRating());
+                            Log.d(TAG, "onResponse: " + response.message());
+                            Log.d(TAG, "onResponse: " + response.code());
+                            Log.d(TAG, "onResponse: " + response.raw());
 
-            @Override
-            public void onFailure(Call<NearbyPlaces> call, Throwable t) {
+                            if (x.equals("restaurant")) {
+                                UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
+                                UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
+                            } else if (x.equals("lodging")) {
+                                UserActivity.nearbyHotelList.addAll(response.body().getResults());
+                                UserActivity.this.nearbyHotels.updateList(UserActivity.nearbyHotelList);
+                            } else {
+                                UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
+                                UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
+                            }
+                        }
 
-            }
-        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<NearbyPlaces> call, Throwable t) {
+                        Log.d(TAG, "onFailure: " + t.getCause() + "\n" + t.getMessage());
+                        t.printStackTrace();
+                    }
+                });
+        if (x.equals("restaurant")) {
+            getNearbyPlaces("cafe");
+        }
     }
 
     private void createLocationCallback() {
@@ -153,7 +180,6 @@ public class UserActivity extends AppCompatActivity {
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
                 Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLatitude() + "::" + mCurrentLocation.getLongitude());
-                getNearbyPlaces();
                 weatherAPI = new WeatherAPI();
                 weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()).
                         enqueue(new Callback<WeatherInfo>() {
@@ -187,6 +213,8 @@ public class UserActivity extends AppCompatActivity {
 
                             }
                         });
+                getNearbyPlaces("restaurant");
+                getNearbyPlaces("lodging");
                 Log.d(TAG, "onLocationResult: ");
                 mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                 Log.d(TAG, "onLocationResult: " + mLastUpdateTime);
@@ -273,6 +301,8 @@ public class UserActivity extends AppCompatActivity {
         UserActivity.mCurrentData = new ArrayList<>();
         UserActivity.mDailyData = new ArrayList<>();
         UserActivity.mHourlyData = new ArrayList<>();
+        UserActivity.nearbyHotelList = new ArrayList<>();
+        UserActivity.nearbyRestaurantList = new ArrayList<>();
         stopLocationUpdates();
     }
 
@@ -317,6 +347,8 @@ public class UserActivity extends AppCompatActivity {
         UserActivity.mCurrentData = new ArrayList<>();
         UserActivity.mDailyData = new ArrayList<>();
         UserActivity.mHourlyData = new ArrayList<>();
+        UserActivity.nearbyHotelList = new ArrayList<>();
+        UserActivity.nearbyRestaurantList = new ArrayList<>();
         super.onDestroy();
     }
 
@@ -330,8 +362,12 @@ public class UserActivity extends AppCompatActivity {
         weeklyData.setContext(this);
         weeklyData.setArguments(weeklyForecastArguments);
         nearbyHotels = new NearbyHotels();
+        nearbyHotels.setContext(this);
+        hotelArguments.putParcelableArrayList("dataList", UserActivity.nearbyHotelList);
+        nearbyHotels.setArguments(hotelArguments);
         nearbyRestaurants = new NearbyRestaurants();
-        restaurantArguments.putParcelableArrayList("dataList", UserActivity.nearbyPlaces);
+        nearbyRestaurants.setContext(this);
+        restaurantArguments.putParcelableArrayList("dataList", UserActivity.nearbyRestaurantList);
         nearbyRestaurants.setArguments(restaurantArguments);
         userProfile = new UserProfile();
         Bundle userDetails = new Bundle();

@@ -33,7 +33,8 @@
             android:paddingTop="8dp"
             android:text="Place Name"
             android:textColor="@color/colorPrimaryDark"
-            android:textSize="18sp" />
+            android:textSize="15sp"
+            android:layout_marginBottom="8dp" />
 
         <RatingBar
             android:id="@+id/ratingBar"
@@ -41,6 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/iv_place_photo"
             android:layout_centerHorizontal="true"
+            style="?android:attr/ratingBarStyleSmall"
+            android:paddingTop="10dp"
             android:layout_marginTop="39dp" />
 
         <com.example.karan.traffikill.CustomViews.CustomTextView

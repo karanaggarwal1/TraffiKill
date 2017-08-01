@@ -11,9 +11,10 @@ import retrofit2.http.Query;
  */
 
 public interface NearbyPlacesClient {
-    @GET("json?&key=AIzaSyCcWcxyuUpiemoDQzHGzJx-yd5jW0Pwt14&rankby=distance&sensor=true")
+    @GET("json?&key=AIzaSyCcWcxyuUpiemoDQzHGzJx-yd5jW0Pwt14&sensor=true")
     Call<NearbyPlaces> getNearbyPlaces(@Query("location") String latLng,
-                                       @Query("type") String type
+                                       @Query("type") String type,
+                                       @Query("radius") int radius
     );
 
 

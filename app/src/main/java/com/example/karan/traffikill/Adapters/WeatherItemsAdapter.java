@@ -175,7 +175,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                             if (d.before(format.parse(formatted + " " + "11:59 PM")) ||
                                     (d.after(format.parse(formatted + " 12:00 AM")) &&
                                             d.before(format.parse(formatted + " 5:00 AM"))))
-                            WeatherItemsAdapter.this.view.setBackgroundResource(R.drawable.night_sky);
+                                WeatherItemsAdapter.this.view.setBackgroundResource(R.drawable.night_sky);
                         } else {
                             WeatherItemsAdapter.this.view.setBackgroundResource(R.drawable.clear_sky);
                         }
@@ -194,9 +194,11 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                                     this.hourlyList.get(x).getPrecipProbability()) * 10000.0) / 100.0 + "" +
                                     "% likely to get stuck in traffic");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvHumidity))).
-                            setText("Humidity = " + WeatherItemsAdapter.this.hourlyList.get(x).getHumidity());
+                            setText("Humidity = " + Math.round(Double.parseDouble(WeatherItemsAdapter.this.hourlyList.get(x).
+                                    getHumidity()) * 10000.0) / 100.0 + "%");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvPrecipIntensity))).
-                            setText("Precipitation Intensity = " + WeatherItemsAdapter.this.hourlyList.get(x).getSummary());
+                            setText("It might rain as intense as " + WeatherItemsAdapter.this.hourlyList.get(x).getPrecipIntensity()
+                                    + " inches of water per hour ");
                 }
             });
             if (position == 0) {
