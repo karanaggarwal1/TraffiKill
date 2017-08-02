@@ -1,5 +1,6 @@
 package com.example.karan.traffikill.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,9 +20,9 @@ import android.widget.Toast;
 
 import com.example.karan.traffikill.Activities.LoginActivity;
 import com.example.karan.traffikill.R;
-import com.example.karan.traffikill.models.EmailUser;
 import com.example.karan.traffikill.models.FacebookUser;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +30,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
@@ -38,10 +42,49 @@ import com.squareup.picasso.Picasso;
 
 public class UserProfile extends Fragment {
     public static final String TAG = "FragmentUserProfile";
+    private static final int PICK_IMAGE_REQUEST = 123;
     public Context context;
+    String provider;
     private FacebookUser facebookUser;
     private View rootview;
-    private EmailUser emailUser;
+    private String path;
+    private StorageReference storageReference;
+    private boolean pictureSet;
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            path = uri.toString().substring(uri.toString().lastIndexOf("."));
+            storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + path.substring(1)).
+                    putFile(data.getData()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        pictureSet = true;
+                        if (provider.equals("email")) {
+                            FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").child(
+                                    FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent(
+                                    new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").child(
+                                                    FirebaseAuth.getInstance().getCurrentUser().getUid()).child("pictureSet").setValue("true");
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                        }
+                        Toast.makeText(UserProfile.this.context, "File Uploaded", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
 
     public Context getContext() {
         return this.context;
@@ -52,6 +95,7 @@ public class UserProfile extends Fragment {
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        storageReference = FirebaseStorage.getInstance().getReference();
         rootview = inflater.inflate(R.layout.fragment_user_profile, container, false);
         rootview.setClickable(true);
         rootview.findViewById(R.id.tvSignOut).setClickable(true);
@@ -66,14 +110,7 @@ public class UserProfile extends Fragment {
                 getActivity().finish();
             }
         });
-        (rootview.findViewById(R.id.user_profile_photo)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: Image Button Clicked");
-                //implement code to change profile picture
-            }
-        });
-        facebookUser = new FacebookUser();
+
         if (getArguments().getString("provider").equals("facebook")) {
             rootview.findViewById(R.id.changePassword).setVisibility(View.GONE);
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().
@@ -109,7 +146,7 @@ public class UserProfile extends Fragment {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Log.d(TAG, "onCancelled: " + databaseError.getDetails() + "\n" + databaseError.getMessage());
                 }
             });
 
@@ -122,7 +159,40 @@ public class UserProfile extends Fragment {
                         child("authorised").
                         child("usersEmail").
                         child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ((TextView) (rootview.findViewById(R.id.user_profile_name))).setText
+                                (dataSnapshot.child("name").getValue().toString());
+                        ((TextView) (rootview.findViewById(R.id.user_profile_short_bio))).setText
+                                ("Email: " + dataSnapshot.child("email").getValue().toString() +
+                                        " \n" + "Username: " + dataSnapshot.child("username").getValue().toString());
+                        pictureSet = (Boolean) dataSnapshot.child("profilePictureSet").getValue();
+//                        ((ImageView)(rootview.findViewById(R.id.user_profile_photo)));
+                    }
 
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
+                        Log.d(TAG, "onCancelled: " + databaseError.getDetails());
+                        Log.d(TAG, "onCancelled: " + databaseError.toException().getCause());
+                        Log.d(TAG, "onCancelled: " + databaseError.toException().getMessage());
+                    }
+                });
+
+            }
+            (rootview.findViewById(R.id.user_profile_photo)).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "onClick: Image Button Clicked");
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+                }
+            });
+            if (pictureSet) {
+                setProfilePicture();
             }
         }
         rootview.findViewById(R.id.changePassword).setOnClickListener(new View.OnClickListener() {
@@ -164,6 +234,22 @@ public class UserProfile extends Fragment {
             }
         });
         return rootview;
+    }
+
+    private void setProfilePicture() {
+        storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + path).
+                getDownloadUrl().
+                addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri taskSnapshot) {
+                        Picasso.with(UserProfile.this.getContext())
+                                .load(taskSnapshot)
+                                .fit()
+                                .placeholder(R.drawable.ic_placeholder)
+                                .error(R.drawable.ic_error)
+                                .into((ImageView) rootview.findViewById(R.id.user_profile_photo));
+                    }
+                });
     }
 
 }

@@ -68,7 +68,7 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                                 userDetails.put("username", EmailAuthenticator.this.userName);
                                 userDetails.put("email", EmailAuthenticator.this.etEmail);
                                 userDetails.put("verified", "false");
-
+                                userDetails.put("pictureSet", "false");
                                 currentUserReference.setValue(userDetails).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {

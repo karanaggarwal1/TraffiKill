@@ -48,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
     ProgressBar progressBar;
     EmailAuthenticator emailAuthenticator;
     EditText etName;
+    private ImageView googleLoginButton;
 
     public static boolean isValidEmail(CharSequence target) {
         if (target == null) {
@@ -102,6 +103,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = (ProgressBar) mainView.findViewById(R.id.determinateBar);
         btnSignIn = (Button) mainView.findViewById(R.id.btnSignIn);
         fbloginButton = (ImageView) mainView.findViewById(R.id.fbLoginButton);
+        googleLoginButton = (ImageView) mainView.findViewById(R.id.btnGoogleSignIn);
         Log.d(TAG, "onMainViewAppeared: " + mainView.getId());
         progressBar.setVisibility(View.INVISIBLE);
         btnSignIn.setClickable(true);
@@ -149,6 +151,12 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "onError: " + error.getCause());
                     }
                 });
+            }
+        });
+        googleLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
     }

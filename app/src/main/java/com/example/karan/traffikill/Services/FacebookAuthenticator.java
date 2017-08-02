@@ -102,6 +102,7 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                                                         getDisplayName().toString());
                                             }
                                             userDetails.put("userID", FacebookAuthenticator.this.userID);
+                                            userDetails.put("pictureSet", "false");
                                             usersRef.child(firebaseAuth.getCurrentUser().getUid()).setValue(userDetails);
                                             retval = true;
                                             publishProgress(100);
