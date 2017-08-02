@@ -32,19 +32,60 @@ public class NearbyRestaurants extends Fragment {
         this.context = context;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList("dataList") != null) {
+            Log.d(TAG, "onCreateView: if clause entered");
+            this.restaurantList = savedInstanceState.getParcelableArrayList("dataList");
+        }
+        if (getArguments() != null && getArguments().getParcelableArrayList("dataList!") != null) {
+            Log.d(TAG, "onCreateView: if clause entered getArguments()");
+            this.restaurantList = savedInstanceState.getParcelableArrayList("dataList");
+        }
+    }
+
+    public ArrayList<ResultData> getData() {
+        return this.restaurantList;
+    }
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootview;
+        Log.d(TAG, "onCreateView: ");
         rootview = inflater.inflate(R.layout.fragment_nearby_restaurants, container, false);
+        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList("dataList") != null) {
+            Log.d(TAG, "onCreateView: if clause entered");
+            this.restaurantList = savedInstanceState.getParcelableArrayList("dataList");
+        }
+        if (getArguments() != null && getArguments().getParcelableArrayList("dataList!") != null) {
+            Log.d(TAG, "onCreateView: if clause entered getArguments()");
+            this.restaurantList = savedInstanceState.getParcelableArrayList("dataList");
+        }
         return rootview;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop: ");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: ");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView: ");
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         restaurants = (RecyclerView) view.findViewById(R.id.rv_restaurants);
-        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList("dataList") != null) {
-            this.restaurantList = savedInstanceState.getParcelableArrayList("dataList");
-        }
         restaurants.setHasFixedSize(true);
         StaggeredGridLayoutManager gaggeredGridLayoutManager = new StaggeredGridLayoutManager(2, 1);
         restaurants.setLayoutManager(gaggeredGridLayoutManager);
@@ -59,6 +100,7 @@ public class NearbyRestaurants extends Fragment {
             nearbyPlaceAdapter.updateData(nearbyPlaces);
             nearbyPlaceAdapter.notifyDataSetChanged();
         }
+        Log.d(TAG, "updateList: " + this.restaurantList.size());
     }
 
     @Override
@@ -76,7 +118,9 @@ public class NearbyRestaurants extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause: ");
+        Log.d(TAG, "onPause: RestaurantList " + this.restaurantList.isEmpty());
+        Log.d(TAG, "onPause: Adapter " + (this.nearbyPlaceAdapter == null));
+        Log.d(TAG, "onPause: RestaurantList " + (this.restaurantList == null));
     }
 
     @Override

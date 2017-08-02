@@ -354,7 +354,7 @@ public class UserActivity extends AppCompatActivity {
 
     private void initUI() {
         viewPager = (ViewPager) findViewById(R.id.navFragContainer);
-        navigationTabAdapter = new NavigationTabAdapter(getSupportFragmentManager());
+        navigationTabAdapter = new NavigationTabAdapter(this.getSupportFragmentManager());
         aboutApp = new AboutApp();
         weeklyData = new WeeklyData();
         weeklyForecastArguments.putParcelableArrayList("dataListHourly", UserActivity.mHourlyData);
@@ -394,6 +394,7 @@ public class UserActivity extends AppCompatActivity {
         navigationTabAdapter.addFragment(nearbyHotels);
         navigationTabAdapter.addFragment(aboutApp);
         viewPager.setAdapter(navigationTabAdapter);
+        viewPager.setOffscreenPageLimit(5);
         final String[] colors = getResources().getStringArray(R.array.vertical_ntb);
         navigationTabBar = (NavigationTabBar) findViewById(R.id.ntb_horizontal);
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
