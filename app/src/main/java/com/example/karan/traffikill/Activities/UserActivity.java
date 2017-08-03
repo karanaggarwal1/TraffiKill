@@ -355,7 +355,7 @@ public class UserActivity extends AppCompatActivity {
     private void initUI() {
         viewPager = (ViewPager) findViewById(R.id.navFragContainer);
         navigationTabAdapter = new NavigationTabAdapter(this.getSupportFragmentManager());
-        aboutApp = new AboutApp();
+        aboutApp = new AboutApp(this);
         weeklyData = new WeeklyData();
         weeklyForecastArguments.putParcelableArrayList("dataListHourly", UserActivity.mHourlyData);
         weeklyForecastArguments.putParcelableArrayList("dataListCurrently", UserActivity.mCurrentData);

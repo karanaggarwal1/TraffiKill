@@ -165,9 +165,9 @@ public class UserProfile extends Fragment {
                         ((TextView) (rootview.findViewById(R.id.user_profile_name))).setText
                                 (dataSnapshot.child("name").getValue().toString());
                         ((TextView) (rootview.findViewById(R.id.user_profile_short_bio))).setText
-                                ("Email: " + dataSnapshot.child("email").getValue().toString() +
-                                        " \n" + "Username: " + dataSnapshot.child("username").getValue().toString());
-                        pictureSet = (Boolean) dataSnapshot.child("profilePictureSet").getValue();
+                                (dataSnapshot.child("email").getValue().toString() +
+                                        " \n" + dataSnapshot.child("username").getValue().toString());
+                        pictureSet = Boolean.parseBoolean(dataSnapshot.child("pictureSet").getValue().toString());
 //                        ((ImageView)(rootview.findViewById(R.id.user_profile_photo)));
                     }
 

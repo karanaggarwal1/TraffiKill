@@ -137,7 +137,7 @@ public class LoginActivity extends AppCompatActivity {
                         FacebookAuthenticator facebookAuthenticator = new FacebookAuthenticator();
                         progressBar.setVisibility(View.VISIBLE);
                         facebookAuthenticator.initializor(LoginActivity.this, progressBar, UserActivity.userAuthentication,
-                                loginResult.getAccessToken().toString());
+                                loginResult.getAccessToken().getUserId());
                         facebookAuthenticator.execute(loginResult.getAccessToken());
                     }
 
