@@ -22,6 +22,7 @@ import com.example.karan.traffikill.Activities.LoginActivity;
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.models.FacebookUser;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -55,32 +56,23 @@ public class UserProfile extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-            Uri uri = data.getData();
-            path = uri.toString().substring(uri.toString().lastIndexOf("."));
-            storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + path.substring(1)).
+            storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + ".jpg").
                     putFile(data.getData()).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if (task.isSuccessful()) {
                         pictureSet = true;
-                        if (provider.equals("email")) {
-                            FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").child(
-                                    FirebaseAuth.getInstance().getCurrentUser().getUid()).addListenerForSingleValueEvent(
-                                    new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").child(
-                                                    FirebaseAuth.getInstance().getCurrentUser().getUid()).child("pictureSet").setValue("true");
-                                        }
+                        FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").child(
+                                FirebaseAuth.getInstance().getCurrentUser().getUid()).child("pictureSet").setValue("true").
+                                addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d(TAG, "onFailure: " + e.getMessage() + "\n" + e.getCause());
+                                    }
+                                });
 
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-
-                                        }
-                                    });
-                        }
-                        Toast.makeText(UserProfile.this.context, "File Uploaded", Toast.LENGTH_SHORT).show();
                     }
+                    Toast.makeText(UserProfile.this.context, "File Uploaded", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -166,7 +158,7 @@ public class UserProfile extends Fragment {
                                 (dataSnapshot.child("name").getValue().toString());
                         ((TextView) (rootview.findViewById(R.id.user_profile_short_bio))).setText
                                 (dataSnapshot.child("email").getValue().toString() +
-                                        " \n" + dataSnapshot.child("username").getValue().toString());
+                                        " \n@" + dataSnapshot.child("username").getValue().toString());
                         pictureSet = Boolean.parseBoolean(dataSnapshot.child("pictureSet").getValue().toString());
 //                        ((ImageView)(rootview.findViewById(R.id.user_profile_photo)));
                     }

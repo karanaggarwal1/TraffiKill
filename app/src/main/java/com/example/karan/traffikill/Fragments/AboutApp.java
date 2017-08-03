@@ -53,7 +53,7 @@ public class AboutApp extends Fragment {
 
     private Element getFutureVersions() {
         Element futureVersions = new Element();
-        futureVersions.setTitle("Coming up in future versions:\nPush Notifications for Rain Alerts\nReal " +
+        futureVersions.setTitle("Coming up in future versions:\nPush Notifications for Rain Alerts\n\nReal " +
                 "time weather data for a pre-planned trip");
         return futureVersions;
     }
