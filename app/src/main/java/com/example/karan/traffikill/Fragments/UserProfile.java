@@ -18,9 +18,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.karan.traffikill.Activities.CustomLocation;
 import com.example.karan.traffikill.Activities.LoginActivity;
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.models.FacebookUser;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,11 +35,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Karan on 28-07-2017.
@@ -51,6 +59,7 @@ public class UserProfile extends Fragment {
     private String path;
     private StorageReference storageReference;
     private boolean pictureSet;
+    private File localFile = null;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -62,19 +71,21 @@ public class UserProfile extends Fragment {
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if (task.isSuccessful()) {
                         pictureSet = true;
-                        FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").child(
-                                FirebaseAuth.getInstance().getCurrentUser().getUid()).child("pictureSet").setValue("true").
-                                addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.d(TAG, "onFailure: " + e.getMessage() + "\n" + e.getCause());
-                                    }
-                                });
-
+                        Toast.makeText(UserProfile.this.context, "File Uploaded", Toast.LENGTH_SHORT).show();
+                        ifPictureSet();
+                        setProfilePicture();
                     }
-                    Toast.makeText(UserProfile.this.context, "File Uploaded", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+        if (requestCode == 234) {
+            if (resultCode == Activity.RESULT_OK) {
+                Toast.makeText(UserProfile.this.getContext(), "Place Selected", Toast.LENGTH_LONG).show();
+                Intent outgoingIntent = new Intent(UserProfile.this.getContext(), CustomLocation.class);
+                outgoingIntent.putExtra("latitude", PlacePicker.getPlace(UserProfile.this.getContext(), data).getLatLng().latitude);
+                outgoingIntent.putExtra("longitude", PlacePicker.getPlace(UserProfile.this.getContext(), data).getLatLng().longitude);
+                startActivity(outgoingIntent);
+            }
         }
     }
 
@@ -86,10 +97,48 @@ public class UserProfile extends Fragment {
         this.context = context;
     }
 
+    public boolean ifPictureSet() {
+        FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("pictureSet").
+                addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            pictureSet = Boolean.parseBoolean((String) dataSnapshot.getValue());
+                            FirebaseDatabase.getInstance().getReference().child("authorised").child("usersEmail").
+                                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("pictureSet").
+                                    setValue("true");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled: " + databaseError.getDetails());
+                    }
+                });
+        return pictureSet;
+    }
+
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         storageReference = FirebaseStorage.getInstance().getReference();
         rootview = inflater.inflate(R.layout.fragment_user_profile, container, false);
         rootview.setClickable(true);
+        rootview.findViewById(R.id.changeLocation).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+                try {
+                    startActivityForResult(intentBuilder.build((Activity) UserProfile.this.getContext()), 234);
+                } catch (GooglePlayServicesRepairableException e) {
+                    Log.d(TAG, "onClick: " + e.getCause() + "\n" + e.getMessage());
+                    e.printStackTrace();
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    Log.d(TAG, "onClick: " + e.getCause() + "\n" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        });
         rootview.findViewById(R.id.tvSignOut).setClickable(true);
         rootview.findViewById(R.id.tvSignOut).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -229,19 +278,28 @@ public class UserProfile extends Fragment {
     }
 
     private void setProfilePicture() {
-        storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + path).
-                getDownloadUrl().
-                addOnSuccessListener(new OnSuccessListener<Uri>() {
+        try {
+            localFile = File.createTempFile("images", "jpg");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        storageReference = storageReference.child("images/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + ".jpg");
+        storageReference.getFile(localFile)
+                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                     @Override
-                    public void onSuccess(Uri taskSnapshot) {
-                        Picasso.with(UserProfile.this.getContext())
-                                .load(taskSnapshot)
-                                .fit()
-                                .placeholder(R.drawable.ic_placeholder)
-                                .error(R.drawable.ic_error)
-                                .into((ImageView) rootview.findViewById(R.id.user_profile_photo));
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        // Successfully downloaded data to local file
+                        if (localFile != null) {
+                            ((ImageView) (rootview.findViewById(R.id.user_profile_photo))).setImageURI
+                                    (Uri.fromFile(localFile));
+                        }
                     }
-                });
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Toast.makeText(UserProfile.this.getContext(), "Error getting file", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

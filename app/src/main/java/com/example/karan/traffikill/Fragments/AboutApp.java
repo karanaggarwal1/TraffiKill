@@ -32,9 +32,9 @@ public class AboutApp extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String description;
         description = "TraffiKill is developed by an independent developer team with limited resources. Help us to grow by donating." +
-                " We are powered by ads so please help us continue the good work. This application provides you with an accurate probability" +
+                " We are powered by ads so please help us continue the good work. This application provides you with an accurate measure" +
                 " of weather it is going to rain or not, for the selected time frame and according to that information you can plan your excursion" +
-                " or trip accordingly as to avoid getting stuck in traffic and wasting otherwise useful time.";
+                " accordingly and avoid getting stuck in traffic and wasting otherwise useful time.";
         View aboutPage = new AboutPage(this.context)
                 .isRTL(false)
                 .setDescription(description)
@@ -53,7 +53,7 @@ public class AboutApp extends Fragment {
 
     private Element getFutureVersions() {
         Element futureVersions = new Element();
-        futureVersions.setTitle("Coming up in future versions:\nPush Notifications for Rain Alerts\n\nReal " +
+        futureVersions.setTitle("Coming up in future versions:\n\nPush Notifications for Rain Alerts\nReal " +
                 "time weather data for a pre-planned trip");
         return futureVersions;
     }

@@ -56,7 +56,7 @@ public class WeeklyData extends Fragment {
         navigationTabStrip.setStripFactor(2);
         navigationTabStrip.setStripType(NavigationTabStrip.StripType.LINE);
         navigationTabStrip.setStripGravity(NavigationTabStrip.StripGravity.BOTTOM);
-//        navigationTabStrip.setTypeface("fonts/typeface.ttf");
+        navigationTabStrip.setTypeface("fonts/Roboto-Thin.ttf");
         navigationTabStrip.setCornersRadius(3);
         navigationTabStrip.setAnimationDuration(300);
         navigationTabStrip.setInactiveColor(Color.GRAY);
