@@ -60,34 +60,34 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
         return new WeatherHolder(itemView);
     }
 
-    public void setIcon(int position, ArrayList<CurrentData> currentList, WeatherHolder holder) {
+    public void setIcon(int position, ArrayList<CurrentData> currentList, ImageView imageView) {
         if (currentList.get(position).getIcon().equals("clear-day")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.clear_day_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.clear_day_icon));
             }
         } else if (currentList.get(position).getIcon().equals("clear-night")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.clear_night_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.clear_night_icon));
             }
         } else if (currentList.get(position).getIcon().equals("cloudy")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.cloudy_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.cloudy_icon));
             }
         } else if (currentList.get(position).getIcon().equals("partly-clear-day")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.partly_cloudy_day_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.partly_cloudy_day_icon));
             }
         } else if (currentList.get(position).getIcon().equals("partly-clear-night")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.clear_night_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.clear_night_icon));
             }
         } else if (currentList.get(position).getIcon().equals("fog")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.fog_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.fog_icon));
             }
         } else if (currentList.get(position).getIcon().equals("rain")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                holder.ivWeatherIcon.setImageDrawable(this.context.getDrawable(R.drawable.rain_icon));
+                imageView.setImageDrawable(this.context.getDrawable(R.drawable.rain_icon));
             }
         }
     }
@@ -124,6 +124,8 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
+                    setIcon(x, WeatherItemsAdapter.this.currentList,
+                            ((ImageView) (WeatherItemsAdapter.this.view.findViewById(R.id.imageView))));
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTempBig))).
                             setText(WeatherItemsAdapter.this.currentList.get(x).getTemperature() + " °C");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvSummary))).
@@ -145,7 +147,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                 holder.itemView.performClick();
             }
             holder.tvTempValue.setText(Math.round(this.currentList.get(position).getTemperature() * 100.0) / 100.0 + "°C");
-            setIcon(position, this.currentList, holder);
+            setIcon(position, this.currentList, holder.ivWeatherIcon);
             DateFormat format = new SimpleDateFormat("hh:mm a");
             format.setTimeZone(TimeZone.getDefault());
             holder.tvTime.setText(format.format(new Date(Long.parseLong(this.currentList.get(position).getTime()) * 1000L)));
@@ -182,6 +184,8 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
+                    setIcon(x, WeatherItemsAdapter.this.hourlyList,
+                            ((ImageView) (WeatherItemsAdapter.this.view.findViewById(R.id.imageView))));
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTempBig))).
                             setText(WeatherItemsAdapter.this.hourlyList.get(x).getTemperature() + "");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvSummary))).
@@ -205,7 +209,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                 holder.itemView.performClick();
             }
             holder.tvTempValue.setText(Math.round(this.hourlyList.get(position).getTemperature() * 100.0) / 100.0 + "°C");
-            setIcon(position, this.hourlyList, holder);
+            setIcon(position, this.hourlyList, holder.ivWeatherIcon);
             DateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
             format.setTimeZone(TimeZone.getDefault());
             holder.tvTime.setText(format.format(new Date(Long.parseLong(this.hourlyList.get(position).getTime()) * 1000L)));
