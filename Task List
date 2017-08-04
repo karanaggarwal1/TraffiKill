@@ -1,5 +1,5 @@
 ### TraffiKill
 
-- [ ] Implement Google+ SignIn
-- [ ] Implement LocationChanged button code
-- [ ] Make the AboutApp page
+- [x] Implement Google+ SignIn
+- [x] Implement LocationChanged button code
+- [x] Make the AboutApp page
