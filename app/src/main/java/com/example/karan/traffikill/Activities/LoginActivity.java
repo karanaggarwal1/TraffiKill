@@ -27,11 +27,18 @@ import android.widget.Toast;
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.Services.EmailAuthenticator;
 import com.example.karan.traffikill.Services.FacebookAuthenticator;
+import com.example.karan.traffikill.Services.GoogleAuthenticator;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -43,6 +50,7 @@ import java.util.Arrays;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
+    private static final int RC_SIGN_IN = 234;
     private final int PERM_REQ_CODE = 123;
     CallbackManager callbackManager;
     ImageView fbloginButton, cancel;
@@ -53,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
     EmailAuthenticator emailAuthenticator;
     EditText etName;
     private ImageView googleLoginButton;
+    private GoogleApiClient mGoogleApiClient;
 
     public static boolean isValidEmail(CharSequence target) {
         if (target == null) {
@@ -174,12 +183,32 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         });
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(getString(R.string.google_sign_in_id))
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.d(TAG, "onConnectionFailed: " + connectionResult.getErrorMessage());
+                    }
+                })
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
         googleLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                progressBar.setVisibility(View.VISIBLE);
+                signIn();
             }
         });
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     @Override
@@ -319,6 +348,18 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (result.isSuccess()) {
+                GoogleSignInAccount account = result.getSignInAccount();
+                GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
+                googleAuthenticator.initializor(LoginActivity.this, LoginActivity.this.progressBar);
+                googleAuthenticator.execute(account);
+            } else {
+
+            }
+        }
     }
+
 
 }

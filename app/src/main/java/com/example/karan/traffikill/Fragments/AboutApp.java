@@ -35,19 +35,22 @@ public class AboutApp extends Fragment {
                 " We are powered by ads so please help us continue the good work. This application provides you with an accurate measure" +
                 " of weather it is going to rain or not, for the selected time frame and according to that information you can plan your excursion" +
                 " accordingly and avoid getting stuck in traffic and wasting otherwise useful time.";
-        View aboutPage = new AboutPage(this.context)
-                .isRTL(false)
-                .setDescription(description)
-                .addItem(getVersionInformation())
-                .addItem(getDarkSkyElement())
-                .addItem(getGooglePlacesElement())
-                .addItem(getFutureVersions())
-                .addGroup("Connect with us")
-                .addEmail("traffikill.developer@gmail.com")
-                .addFacebook("")
-                .addPlayStore("com.example.karan.traffikill")
-                .addGitHub("karanaggarwal1/TraffiKill")
-                .create();
+        View aboutPage = null;
+        if (this.context != null) {
+            aboutPage = new AboutPage(this.context)
+                    .isRTL(false)
+                    .setDescription(description)
+                    .addItem(getVersionInformation())
+                    .addItem(getDarkSkyElement())
+                    .addItem(getGooglePlacesElement())
+                    .addItem(getFutureVersions())
+                    .addGroup("Connect with us")
+                    .addEmail("traffikill.developer@gmail.com")
+                    .addFacebook("")
+                    .addPlayStore("com.example.karan.traffikill")
+                    .addGitHub("karanaggarwal1/TraffiKill")
+                    .create();
+        }
         return aboutPage;
     }
 

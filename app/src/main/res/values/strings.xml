@@ -13,6 +13,7 @@
     <string name="gps_network_not_enabled">Traffikill needs GPS Services. Please turn on GPS for the app to function properly.</string>
     <string name="open_location_settings">Enable Location Services.</string>
     <string name="Cancel">Don\'t Enable</string>
+    <string name="google_sign_in_id">755576237988-b9pa02ti3r0qs5n1eqgsqnq43gruqikg.apps.googleusercontent.com</string>
     <string name="google_maps_api">AIzaSyCcWcxyuUpiemoDQzHGzJx-yd5jW0Pwt14</string>
     <string name="zomato_api">391b6ddbf7ff3f3c61d1daeae718be08</string>
     <string name="title_activity_maps">Map</string>

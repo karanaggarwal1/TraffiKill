@@ -192,7 +192,33 @@ public class UserProfile extends Fragment {
             });
 
         } else if (getArguments().getString("provider").equals("google")) {
-            //TODO: after setting up google profile
+            rootview.findViewById(R.id.changePassword).setVisibility(View.GONE);
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().
+                    child("authorised").
+                    child("usersGoogle").
+                    child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child("name") != null && dataSnapshot.child("name").getValue() != null) {
+                        ((TextView) rootview.findViewById(R.id.user_profile_name)).setText(dataSnapshot.child("name").getValue().toString());
+                    }
+                    if (dataSnapshot.child("photoURL") != null && dataSnapshot.child("photoURL").getValue() != null) {
+                        Picasso.with(UserProfile.this.getContext())
+                                .load(Uri.parse(dataSnapshot.child("photoURL").getValue().toString()))
+                                .fit()
+                                .placeholder(R.drawable.ic_placeholder)
+                                .error(R.drawable.ic_error)
+                                .into((ImageView) rootview.findViewById(R.id.user_profile_photo));
+                    }
+                    ((TextView) rootview.findViewById(R.id.user_profile_short_bio)).setText(dataSnapshot.child("email").getValue().toString());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(TAG, "onCancelled: " + databaseError.getDetails() + "\n" + databaseError.getMessage());
+                }
+            });
         } else {
             if (getArguments().getString("provider").equals("email")) {
                 rootview.findViewById(R.id.changePassword).setVisibility(View.VISIBLE);
