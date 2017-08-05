@@ -161,7 +161,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                     String[] parts = format.format(new Date(Long.parseLong(WeatherItemsAdapter.
                             this.hourlyList.get(x).getTime()) * 1000L)).split(" ");
                     String time = parts[1] + " " + parts[2];
-                    format = new SimpleDateFormat("hh:mm a");
+                    format = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
                     DateFormat newFormat = new SimpleDateFormat("dd/MM/yyyy");
                     String formatted = newFormat.format(new Date(Long.parseLong(WeatherItemsAdapter.
                             this.hourlyList.get(x).getTime()) * 1000L));
@@ -187,7 +187,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                     setIcon(x, WeatherItemsAdapter.this.hourlyList,
                             ((ImageView) (WeatherItemsAdapter.this.view.findViewById(R.id.imageView))));
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTempBig))).
-                            setText(WeatherItemsAdapter.this.hourlyList.get(x).getTemperature() + "");
+                            setText(WeatherItemsAdapter.this.hourlyList.get(x).getTemperature() + "°C");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvSummary))).
                             setText(WeatherItemsAdapter.this.hourlyList.get(x).getSummary());
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTime))).
