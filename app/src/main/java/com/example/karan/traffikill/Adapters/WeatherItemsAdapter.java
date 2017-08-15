@@ -19,16 +19,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
-/**
- * Created by Karan on 31-07-2017.
- */
 
 public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapter.WeatherHolder> {
-    ArrayList<CurrentData> hourlyList;
-    ArrayList<CurrentData> currentList;
-    String type;
-    Context context;
-    View view;
+    private ArrayList<CurrentData> hourlyList;
+    private ArrayList<CurrentData> currentList;
+    private String type;
+    private Context context;
+    private View view;
 
     public WeatherItemsAdapter(Context context) {
         this.context = context;
@@ -60,7 +57,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
         return new WeatherHolder(itemView);
     }
 
-    public void setIcon(int position, ArrayList<CurrentData> currentList, ImageView imageView) {
+    private void setIcon(int position, ArrayList<CurrentData> currentList, ImageView imageView) {
         if (currentList.get(position).getIcon().equals("clear-day")) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 imageView.setImageDrawable(this.context.getDrawable(R.drawable.clear_day_icon));
@@ -116,6 +113,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                         e.printStackTrace();
                     }
                     try {
+                        assert d != null;
                         if (d.after(format.parse(formatted + " " + "7:00 PM"))) {
                             WeatherItemsAdapter.this.view.setBackgroundResource(R.drawable.night_sky);
                         } else {
@@ -160,7 +158,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                     DateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
                     String[] parts = format.format(new Date(Long.parseLong(WeatherItemsAdapter.
                             this.hourlyList.get(x).getTime()) * 1000L)).split(" ");
-                    String time = parts[1] + " " + parts[2];
+                    String time = parts[0] + " " + parts[1] + " " + parts[2];
                     format = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
                     DateFormat newFormat = new SimpleDateFormat("dd/MM/yyyy");
                     String formatted = newFormat.format(new Date(Long.parseLong(WeatherItemsAdapter.
@@ -173,6 +171,7 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                         e.printStackTrace();
                     }
                     try {
+                        assert d != null;
                         if (d.after(format.parse(formatted + " " + "7:00 PM")) && d.before(format.parse(formatted + " " + "5:00 AM"))) {
                             if (d.before(format.parse(formatted + " " + "11:59 PM")) ||
                                     (d.after(format.parse(formatted + " 12:00 AM")) &&

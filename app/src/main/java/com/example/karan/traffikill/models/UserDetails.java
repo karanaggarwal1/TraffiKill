@@ -4,10 +4,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by Karan on 18-07-2017.
- */
-
 public class UserDetails implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public UserDetails createFromParcel(Parcel in) {
@@ -18,8 +14,8 @@ public class UserDetails implements Parcelable {
             return new UserDetails[size];
         }
     };
-    String name, email;
-    Uri imageURL;
+    private String name, email;
+    private Uri imageURL;
 
     public UserDetails(String name, String email, Uri imageURL) {
         this.name = name;
@@ -27,7 +23,7 @@ public class UserDetails implements Parcelable {
         this.imageURL = imageURL;
     }
 
-    public UserDetails(Parcel in) {
+    private UserDetails(Parcel in) {
         String[] data = new String[3];
 
         in.readStringArray(data);

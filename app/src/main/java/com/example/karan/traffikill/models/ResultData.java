@@ -8,10 +8,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
-/**
- * Created by Karan on 25-07-2017.
- */
-
 public class ResultData implements Parcelable {
     public static final Parcelable.Creator<ResultData> CREATOR =
             new Parcelable.Creator<ResultData>() {
@@ -24,7 +20,7 @@ public class ResultData implements Parcelable {
                 }
             };
 
-    public ResultData(Parcel parcel) {
+    private ResultData(Parcel parcel) {
         this.name = parcel.readString();
         this.rating = parcel.readFloat();
         this.geometry = parcel.readParcelable(GeometryData.class.getClassLoader());
@@ -32,23 +28,23 @@ public class ResultData implements Parcelable {
     }
     @SerializedName("geometry")
     @Expose
-    GeometryData geometry;
+    private GeometryData geometry;
 
     @SerializedName("name")
     @Expose
-    String name;
+    private String name;
 
     @SerializedName("rating")
     @Expose
-    float rating;
+    private float rating;
 
     @SerializedName("vicinty")
     @Expose
-    String vicinity;
+    private String vicinity;
 
     @SerializedName("photos")
     @Expose
-    ArrayList<PhotoDetails> photos;
+    private ArrayList<PhotoDetails> photos;
 
     public ArrayList<PhotoDetails> getPhotosData() {
         return photos;

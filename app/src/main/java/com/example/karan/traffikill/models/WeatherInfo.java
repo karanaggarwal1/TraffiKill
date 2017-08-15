@@ -6,10 +6,6 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by Karan on 22-07-2017.
- */
-
 public class WeatherInfo implements Parcelable {
     public static final Parcelable.Creator<WeatherInfo> CREATOR =
             new Parcelable.Creator<WeatherInfo>() {
@@ -24,17 +20,17 @@ public class WeatherInfo implements Parcelable {
 
     @SerializedName("currently")
     @Expose
-    CurrentData currently;
+    private CurrentData currently;
 
     @SerializedName("hourly")
     @Expose
-    KeyListHourly hourly;
+    private KeyListHourly hourly;
 
     @SerializedName("daily")
     @Expose
-    KeyListDaily daily;
+    private KeyListDaily daily;
 
-    public WeatherInfo(Parcel parcel) {
+    private WeatherInfo(Parcel parcel) {
         parcel.readParcelable(CurrentData.class.getClassLoader());
         parcel.readParcelable(KeyListHourly.class.getClassLoader());
         parcel.readParcelable(KeyListDaily.class.getClassLoader());

@@ -17,7 +17,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.Adapters.NavigationTabAdapter;
@@ -53,9 +52,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 import devlight.io.library.ntb.NavigationTabBar;
 import retrofit2.Call;
@@ -67,7 +64,6 @@ public class UserActivity extends AppCompatActivity {
     public static final int REQUEST_CHECK_SETTINGS = 456;
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 900000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = 600000;
-    private static final String TAG = "LocationUpdates";
     public static Location mCurrentLocation;
     public static ArrayList<CurrentData> mCurrentData;
     public static ArrayList<CurrentData> mHourlyData;
@@ -88,7 +84,6 @@ public class UserActivity extends AppCompatActivity {
     WeeklyData weeklyData;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean mRequestingLocationUpdates = true;
-    private String mLastUpdateTime;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private SettingsClient settingsClient;
     private LocationRequest locationRequest;
@@ -142,21 +137,18 @@ public class UserActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<NearbyPlaces> call, Response<NearbyPlaces> response) {
                         if (response.isSuccessful()) {
-                            Log.d(TAG, "onResponse: " + response.errorBody());
-                            Log.d(TAG, "onResponse: " + response.body().getResults().get(0).getRating());
-                            Log.d(TAG, "onResponse: " + response.message());
-                            Log.d(TAG, "onResponse: " + response.code());
-                            Log.d(TAG, "onResponse: " + response.raw());
-
-                            if (x.equals("restaurant")) {
-                                UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
-                                UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
-                            } else if (x.equals("lodging")) {
-                                UserActivity.nearbyHotelList.addAll(response.body().getResults());
-                                UserActivity.this.nearbyHotels.updateList(UserActivity.nearbyHotelList);
-                            } else {
-                                UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
-                                UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
+                            switch (x) {
+                                case "restaurant":
+                                    UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
+                                    UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
+                                    break;
+                                case "lodging":
+                                    UserActivity.nearbyHotelList.addAll(response.body().getResults());
+                                    UserActivity.this.nearbyHotels.updateList(UserActivity.nearbyHotelList);
+                                    break;
+                                default:
+                                    UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
+                                    UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
                             }
                         }
 
@@ -164,8 +156,7 @@ public class UserActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<NearbyPlaces> call, Throwable t) {
-                        Log.d(TAG, "onFailure: " + t.getCause() + "\n" + t.getMessage());
-                        t.printStackTrace();
+                        Toast.makeText(UserActivity.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
         if (x.equals("restaurant")) {
@@ -179,23 +170,23 @@ public class UserActivity extends AppCompatActivity {
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 mCurrentLocation = locationResult.getLastLocation();
-                Log.d(TAG, "onLocationResult: " + mCurrentLocation.getLatitude() + "::" + mCurrentLocation.getLongitude());
                 weatherAPI = new WeatherAPI();
                 weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()).
                         enqueue(new Callback<WeatherInfo>() {
                             @Override
                             public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
-                                Log.d(TAG, "onResponse: " + response.isSuccessful());
                                 UserActivity.mCurrentData.add(response.body().getCurrently());
-                                Log.d(TAG, "onResponse: " + response.body().getCurrently().getSummary());
                                 UserActivity.mCurrentData.addAll(response.body().getHourly().getData());
                                 weeklyData.updateList(UserActivity.mCurrentData, "currently");
                             }
 
                             @Override
                             public void onFailure(Call<WeatherInfo> call, Throwable t) {
-                                Log.d(TAG, "onFailure: " + call.isCanceled());
-                                Log.d(TAG, "onFailure: " + t.getCause());
+                                if (call.isCanceled()) {
+                                    Toast.makeText(UserActivity.this, "The Call was cancelled", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(UserActivity.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
                 weatherAPI.getWeatherClient().getWeatherInfo(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude(), "hourly").
@@ -210,14 +201,11 @@ public class UserActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(Call<WeatherInfo> call, Throwable t) {
-
+                                Toast.makeText(UserActivity.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
                             }
                         });
                 getNearbyPlaces("restaurant");
                 getNearbyPlaces("lodging");
-                Log.d(TAG, "onLocationResult: ");
-                mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-                Log.d(TAG, "onLocationResult: " + mLastUpdateTime);
             }
         };
     }
@@ -282,7 +270,7 @@ public class UserActivity extends AppCompatActivity {
                                     ResolvableApiException rae = (ResolvableApiException) e;
                                     rae.startResolutionForResult(UserActivity.this, REQUEST_CHECK_SETTINGS);
                                 } catch (IntentSender.SendIntentException sie) {
-                                    Log.d(TAG, "onFailure: " + sie.getCause());
+                                    Toast.makeText(UserActivity.this, sie.getCause().toString(), Toast.LENGTH_SHORT).show();
                                 }
                                 break;
                             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -378,7 +366,6 @@ public class UserActivity extends AppCompatActivity {
             startActivity(loginScreen);
             return;
         } else {
-            Log.d(TAG, "initUI: " + currentUser.getProviders().get(currentUser.getProviders().size() - 1));
             if ((currentUser.getProviders().get(currentUser.getProviders().size() - 1)).equals("facebook.com")) {
                 userDetails.putString("provider", "facebook");
             } else if ((currentUser.getProviders().get(currentUser.getProviders().size() - 1)).equals("google.com")) {

@@ -6,10 +6,6 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by Karan on 22-07-2017.
- */
-
 class DataItemsDaily implements Parcelable {
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -23,24 +19,24 @@ class DataItemsDaily implements Parcelable {
     };
     @SerializedName("summary")
     @Expose
-    public String summary;
+    private String summary;
     @SerializedName("precipIntensity")
     @Expose
-    public String precipIntensity;
+    private String precipIntensity;
     @SerializedName("precipIntensityMax")
     @Expose
-    public String precipIntensityMax;
+    private String precipIntensityMax;
     @SerializedName("precipIntensityMaxTime")
     @Expose
-    public String precipIntensityMaxTime;
+    private String precipIntensityMaxTime;
     @SerializedName("precipProbability")
     @Expose
-    public String precipProbability;
+    private String precipProbability;
     @SerializedName("humidity")
     @Expose
-    public String humidity;
+    private String humidity;
 
-    public DataItemsDaily(Parcel in) {
+    private DataItemsDaily(Parcel in) {
         String[] data = new String[6];
 
         in.readStringArray(data);

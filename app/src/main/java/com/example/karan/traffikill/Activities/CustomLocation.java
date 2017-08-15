@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.widget.Toast;
 
 import com.example.karan.traffikill.Adapters.WeatherItemsAdapter;
 import com.example.karan.traffikill.R;
@@ -21,7 +21,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CustomLocation extends AppCompatActivity {
-    private static final String TAG = "CustomLocation";
     RecyclerView weatherList;
     WeatherItemsAdapter weatherItemsAdapter;
     ArrayList<CurrentData> currentList;
@@ -48,7 +47,7 @@ public class CustomLocation extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<WeatherInfo> call, Throwable t) {
-                Log.d(TAG, "onFailure: " + t.getCause() + "\n" + t.getMessage());
+                Toast.makeText(CustomLocation.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
             }
         });
         final NavigationTabStrip navigationTabStrip = (NavigationTabStrip) findViewById(R.id.navTabStrip);

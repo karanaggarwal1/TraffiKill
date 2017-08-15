@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,18 +44,12 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Created by Karan on 28-07-2017.
- */
-
 public class UserProfile extends Fragment {
     public static final String TAG = "FragmentUserProfile";
     private static final int PICK_IMAGE_REQUEST = 123;
     public Context context;
-    String provider;
     private FacebookUser facebookUser;
     private View rootview;
-    private String path;
     private StorageReference storageReference;
     private boolean pictureSet;
     private File localFile = null;
@@ -113,7 +106,7 @@ public class UserProfile extends Fragment {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getDetails());
+                        Toast.makeText(UserProfile.this.getContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
         return pictureSet;
@@ -124,18 +117,17 @@ public class UserProfile extends Fragment {
         storageReference = FirebaseStorage.getInstance().getReference();
         rootview = inflater.inflate(R.layout.fragment_user_profile, container, false);
         rootview.setClickable(true);
-        rootview.findViewById(R.id.changeLocation).setOnClickListener(new View.OnClickListener() {
+        rootview.findViewById(R.id.changeLocation);
+        rootview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
                 try {
                     startActivityForResult(intentBuilder.build((Activity) UserProfile.this.getContext()), 234);
                 } catch (GooglePlayServicesRepairableException e) {
-                    Log.d(TAG, "onClick: " + e.getCause() + "\n" + e.getMessage());
-                    e.printStackTrace();
+                    Toast.makeText(UserProfile.this.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 } catch (GooglePlayServicesNotAvailableException e) {
-                    Log.d(TAG, "onClick: " + e.getCause() + "\n" + e.getMessage());
-                    e.printStackTrace();
+                    Toast.makeText(UserProfile.this.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -143,7 +135,6 @@ public class UserProfile extends Fragment {
         rootview.findViewById(R.id.tvSignOut).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: buttonClicked");
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(getContext(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -173,7 +164,6 @@ public class UserProfile extends Fragment {
                                     ((ImageView) (rootview.findViewById(R.id.user_profile_photo))).
                                             setImageDrawable(getContext().getDrawable(R.drawable.ic_error));
                                 }
-                                Log.d(TAG, "onImageLoadFailed: " + exception.getCause());
                             }
                         });
                         builder.downloader(new OkHttpDownloader(getContext()));
@@ -187,7 +177,7 @@ public class UserProfile extends Fragment {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.d(TAG, "onCancelled: " + databaseError.getDetails() + "\n" + databaseError.getMessage());
+                    Toast.makeText(UserProfile.this.getContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -201,7 +191,8 @@ public class UserProfile extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.child("name") != null && dataSnapshot.child("name").getValue() != null) {
-                        ((TextView) rootview.findViewById(R.id.user_profile_name)).setText(dataSnapshot.child("name").getValue().toString());
+                        ((TextView) rootview.findViewById(R.id.user_profile_name)).setText(dataSnapshot.child("name").
+                                getValue().toString());
                     }
                     if (dataSnapshot.child("photoURL") != null && dataSnapshot.child("photoURL").getValue() != null) {
                         Picasso.with(UserProfile.this.getContext())
@@ -211,16 +202,18 @@ public class UserProfile extends Fragment {
                                 .error(R.drawable.ic_error)
                                 .into((ImageView) rootview.findViewById(R.id.user_profile_photo));
                     }
-                    ((TextView) rootview.findViewById(R.id.user_profile_short_bio)).setText(dataSnapshot.child("email").getValue().toString());
+                    ((TextView) rootview.findViewById(R.id.user_profile_short_bio)).setText(dataSnapshot.child("email").
+                            getValue().toString());
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Log.d(TAG, "onCancelled: " + databaseError.getDetails() + "\n" + databaseError.getMessage());
+                    Toast.makeText(UserProfile.this.getContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
             if (getArguments().getString("provider").equals("email")) {
+                rootview.findViewById(R.id.user_profile_photo).setBackgroundResource(R.drawable.background_photo);
                 rootview.findViewById(R.id.changePassword).setVisibility(View.VISIBLE);
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().
                         child("authorised").
@@ -240,10 +233,7 @@ public class UserProfile extends Fragment {
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-                        Log.d(TAG, "onCancelled: " + databaseError.getMessage());
-                        Log.d(TAG, "onCancelled: " + databaseError.getDetails());
-                        Log.d(TAG, "onCancelled: " + databaseError.toException().getCause());
-                        Log.d(TAG, "onCancelled: " + databaseError.toException().getMessage());
+                        Toast.makeText(UserProfile.this.getContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -251,7 +241,6 @@ public class UserProfile extends Fragment {
             (rootview.findViewById(R.id.user_profile_photo)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "onClick: Image Button Clicked");
                     Intent intent = new Intent();
                     intent.setType("image/*");
                     intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -265,7 +254,6 @@ public class UserProfile extends Fragment {
         rootview.findViewById(R.id.changePassword).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: changePasswordClicked");
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage("Resetting the Password will Log you Out")
                         .setPositiveButton("Reset Password", new DialogInterface.OnClickListener() {

@@ -3,10 +3,6 @@ package com.example.karan.traffikill.Services;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- * Created by Karan on 22-07-2017.
- */
-
 public class WeatherAPI{
         public WeatherClient getWeatherClient() {
             String BASE_URL = "https://api.darksky.net/forecast/38d2752b399dfb6dfa27f764ec33ed24/";

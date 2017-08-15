@@ -17,10 +17,6 @@ import com.gigamole.navigationtabstrip.NavigationTabStrip;
 
 import java.util.ArrayList;
 
-/**
- * Created by Karan on 28-07-2017.
- */
-
 public class WeeklyData extends Fragment {
 
     View rootview;

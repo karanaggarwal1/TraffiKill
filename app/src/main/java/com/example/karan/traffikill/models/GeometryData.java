@@ -5,16 +5,13 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-/**
- * Created by Karan on 25-07-2017.
- */
 
 public class GeometryData implements Parcelable {
     @SerializedName("location")
     @Expose
-    LocationData location;
+    private LocationData location;
 
-    protected GeometryData(Parcel in) {
+    private GeometryData(Parcel in) {
         location = in.readParcelable(LocationData.class.getClassLoader());
     }
 

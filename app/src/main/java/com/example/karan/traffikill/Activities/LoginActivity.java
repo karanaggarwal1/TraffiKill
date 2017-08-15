@@ -11,11 +11,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -49,7 +47,6 @@ import com.truizlop.fabreveallayout.OnRevealChangeListener;
 import java.util.Arrays;
 
 public class LoginActivity extends AppCompatActivity {
-    private static final String TAG = "LoginActivity";
     private static final int RC_SIGN_IN = 234;
     private final int PERM_REQ_CODE = 123;
     CallbackManager callbackManager;
@@ -64,13 +61,7 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleApiClient mGoogleApiClient;
 
     public static boolean isValidEmail(CharSequence target) {
-        if (target == null) {
-            return false;
-        } else {
-            Log.d(TAG, "isValidEmail: " + Patterns.EMAIL_ADDRESS.matcher(target).matches());
-            Log.d(TAG, "isValidEmail: " + target.toString());
-            return Patterns.EMAIL_ADDRESS.matcher(target).matches();
-        }
+        return target != null && Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
     @Override
@@ -97,11 +88,12 @@ public class LoginActivity extends AppCompatActivity {
             UserActivity.userAuthentication.signOut();
             LoginManager.getInstance().logOut();
         }
-        setupMainScreen((CardView) findViewById(R.id.content_login));
+        setupMainScreen(findViewById(R.id.content_login));
     }
 
     public void checkPermission(Context context, String perm) {
-        //TODO: Implement a permission driven interface in other activities as well
+        //Don't need permission check in other activities as all fragments run on this activity's
+        // stack itself so all permissions given apply to them as well
         if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
         }
@@ -117,13 +109,11 @@ public class LoginActivity extends AppCompatActivity {
         btnSignIn = (Button) mainView.findViewById(R.id.btnSignIn);
         fbloginButton = (ImageView) mainView.findViewById(R.id.fbLoginButton);
         googleLoginButton = (ImageView) mainView.findViewById(R.id.btnGoogleSignIn);
-        Log.d(TAG, "onMainViewAppeared: " + mainView.getId());
         progressBar.setVisibility(View.INVISIBLE);
         btnSignIn.setClickable(true);
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: ButtonClicked");
                 progressBar.setVisibility(View.VISIBLE);
                 if (UserActivity.userAuthentication.getCurrentUser() != null) {
                     UserActivity.userAuthentication.signOut();
@@ -157,7 +147,6 @@ public class LoginActivity extends AppCompatActivity {
         fbloginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "onClick: Button Clicked");
                 LoginManager.getInstance().logOut();
                 LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this,
                         Arrays.asList("public_profile", "user_friends, email"));
@@ -178,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(FacebookException error) {
-                        Log.d(TAG, "onError: " + error.getCause());
+                        Toast.makeText(LoginActivity.this, error.getCause().toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -191,7 +180,7 @@ public class LoginActivity extends AppCompatActivity {
                 .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Log.d(TAG, "onConnectionFailed: " + connectionResult.getErrorMessage());
+                        Toast.makeText(LoginActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -271,7 +260,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void afterTextChanged(Editable s) {
                         if (s.toString().trim().equals("")) {
                             btnGetStarted.setClickable(false);
-                            Toast.makeText(LoginActivity.this, "Please Enter your name", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Please Enter your Email", Toast.LENGTH_SHORT).show();
                         } else {
                             btnGetStarted.setClickable(true);
                         }
@@ -292,7 +281,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void afterTextChanged(Editable s) {
                         if (s.toString().trim().equals("")) {
                             btnGetStarted.setClickable(false);
-                            Toast.makeText(LoginActivity.this, "Please Enter your name", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Please Enter your Password", Toast.LENGTH_SHORT).show();
                         } else {
                             btnGetStarted.setClickable(true);
                         }
@@ -317,15 +306,22 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Passwords Do Not Match!", Toast.LENGTH_SHORT).show();
                             return;
                         }
-
+                        if (!isValidUsername(etUsername.getText().toString().trim())) {
+//                            '/', '.', '#', '$', '[', or ']
+                            Toast.makeText(LoginActivity.this, "Username can not contain any of the following: '/', '.' , '#' ," +
+                                            " '$' , '[' , ']' , ' ' ",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                         if (etSignUpPassword.getText().toString().equals(etConfirmPassword.getText().toString())) {
                             emailAuthenticator.initialise(LoginActivity.this,
                                     etName.getText().toString(),
                                     etEmail.getText().toString(),
                                     etSignUpPassword.getText().toString(),
-                                    etSignUpUsername.getText().toString());
+                                    etSignUpUsername.getText().toString(),
+                                    progressBar);
                             progressBar.setVisibility(View.VISIBLE);
                             emailAuthenticator.execute();
+
                             btnGetStarted.setClickable(false);
                         }
                     }
@@ -333,6 +329,11 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private boolean isValidUsername(String trim) {
+        return !(trim.contains("/") || trim.contains(".") ||
+                trim.contains("#") || trim.contains("$") || trim.contains("[") || trim.contains("]") || trim.contains(" "));
     }
 
     private void prepareBackTransition(final FABRevealLayout fabRevealLayout) {
@@ -356,7 +357,7 @@ public class LoginActivity extends AppCompatActivity {
                 googleAuthenticator.initializor(LoginActivity.this, LoginActivity.this.progressBar);
                 googleAuthenticator.execute(account);
             } else {
-
+                Toast.makeText(LoginActivity.this, result.getStatus().toString(), Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -45,7 +45,7 @@ public class CurrentData implements Parcelable {
     @Expose
     private double temperature;
 
-    public CurrentData(Parcel in) {
+    private CurrentData(Parcel in) {
         String[] data = new String[8];
 
         in.readStringArray(data);
@@ -88,9 +88,6 @@ public class CurrentData implements Parcelable {
         return humidity;
     }
 
-    public String getDewPoint() {
-        return dewPoint;
-    }
 
     @Override
     public int describeContents() {

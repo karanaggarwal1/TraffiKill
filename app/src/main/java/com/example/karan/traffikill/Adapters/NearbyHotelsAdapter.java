@@ -17,9 +17,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-/**
- * Created by Karan on 01-08-2017.
- */
 
 public class NearbyHotelsAdapter extends RecyclerView.Adapter<NearbyHotelsAdapter.HotelHolder> {
 
@@ -35,12 +32,11 @@ public class NearbyHotelsAdapter extends RecyclerView.Adapter<NearbyHotelsAdapte
     public HotelHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layoutView = layoutInflater.inflate(R.layout.nearby_hotel_list_item, null);
-        HotelHolder rcv = new HotelHolder(layoutView);
-        return rcv;
+        return new HotelHolder(layoutView);
     }
 
     @Override
-    public void onBindViewHolder(HotelHolder holder, final int position) {
+    public void onBindViewHolder(HotelHolder holder, int position) {
         Picasso.with(context)
                 .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key=AIzaSyCcWcxyuUpiemoDQzHGzJx-yd5jW0Pwt14" +
                         "&maxwidth=260&photoreference=" +
@@ -52,13 +48,14 @@ public class NearbyHotelsAdapter extends RecyclerView.Adapter<NearbyHotelsAdapte
                 .into(holder.placePhoto);
         holder.placeName.setText(this.itemList.get(position).getName());
         holder.ratingBar.setRating(this.itemList.get(position).getRating());
+        final int x = position;
         holder.showInMaps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Uri gmmIntentUri = Uri.parse("geo:0,0?q=" +
-                        NearbyHotelsAdapter.this.itemList.get(position).getGeometry().getLocationData().getLatitude() + "," +
-                        NearbyHotelsAdapter.this.itemList.get(position).getGeometry().getLocationData().getLongitude() +
-                        "(" + NearbyHotelsAdapter.this.itemList.get(position).getName() + ")");
+                        NearbyHotelsAdapter.this.itemList.get(x).getGeometry().getLocationData().getLatitude() + "," +
+                        NearbyHotelsAdapter.this.itemList.get(x).getGeometry().getLocationData().getLongitude() +
+                        "(" + NearbyHotelsAdapter.this.itemList.get(x).getName() + ")");
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                 mapIntent.setPackage("com.google.android.apps.maps");
                 NearbyHotelsAdapter.this.context.startActivity(mapIntent);

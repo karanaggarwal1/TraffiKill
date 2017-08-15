@@ -5,14 +5,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
-/**
- * Created by Karan on 24-07-2017.
- */
-
 public class NearbyPlaces {
     @SerializedName("results")
     @Expose
-    ArrayList<ResultData> results;
+    private ArrayList<ResultData> results;
 
     public ArrayList<ResultData> getResults() {
         return results;

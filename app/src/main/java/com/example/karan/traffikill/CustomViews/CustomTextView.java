@@ -4,10 +4,6 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 
-/**
- * Created by Karan on 31-07-2017.
- */
-
 public class CustomTextView extends android.support.v7.widget.AppCompatTextView {
     private Context context;
 

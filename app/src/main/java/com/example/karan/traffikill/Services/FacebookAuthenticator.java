@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -26,13 +25,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Karan on 27-07-2017.
- */
-
 public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boolean> {
 
-    private String TAG = "FacebookAuthenticator";
     private Context context;
     private ProgressBar progressBar;
     private boolean retval;
@@ -74,7 +68,6 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "signInWithCredential:success");
                             Toast.makeText(FacebookAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
                             publishProgress(50);
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -120,7 +113,6 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                             FacebookAuthenticator.this.context.startActivity(new Intent(FacebookAuthenticator.this.context,
                                     UserActivity.class));
                         } else {
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(FacebookAuthenticator.this.context, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                             retval = false;

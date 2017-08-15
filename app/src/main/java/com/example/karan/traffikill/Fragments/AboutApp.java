@@ -46,7 +46,7 @@ public class AboutApp extends Fragment {
                     .addItem(getFutureVersions())
                     .addGroup("Connect with us")
                     .addEmail("traffikill.developer@gmail.com")
-                    .addFacebook("")
+                    .addFacebook("TraffiKill")
                     .addPlayStore("com.example.karan.traffikill")
                     .addGitHub("karanaggarwal1/TraffiKill")
                     .create();

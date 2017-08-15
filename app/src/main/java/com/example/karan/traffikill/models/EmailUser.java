@@ -1,9 +1,5 @@
 package com.example.karan.traffikill.models;
 
-/**
- * Created by Karan on 29-07-2017.
- */
-
 public class EmailUser {
     public String username;
 

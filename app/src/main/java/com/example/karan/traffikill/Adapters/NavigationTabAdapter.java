@@ -12,10 +12,6 @@ import com.example.karan.traffikill.Fragments.NearbyRestaurants;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Karan on 28-07-2017.
- */
-
 public class NavigationTabAdapter extends FragmentPagerAdapter {
     private final List<Fragment> mFragments = new ArrayList<>();
     FragmentManager fragmentManager;

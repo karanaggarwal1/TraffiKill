@@ -6,9 +6,6 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by Karan on 25-07-2017.
- */
 
 public class PhotoDetails implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -22,15 +19,15 @@ public class PhotoDetails implements Parcelable {
     };
     @SerializedName("photo_reference")
     @Expose
-    String photoReference;
+    private String photoReference;
     @SerializedName("height")
     @Expose
-    int height;
+    private int height;
     @SerializedName("width")
     @Expose
-    int width;
+    private int width;
 
-    public PhotoDetails(Parcel in) {
+    private PhotoDetails(Parcel in) {
         String[] data = new String[3];
         in.readStringArray(data);
         this.photoReference = data[0];

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -27,12 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Karan on 05-08-2017.
- */
-
 public class GoogleAuthenticator extends AsyncTask<GoogleSignInAccount, Void, Void> {
-    private static final String TAG = "GoogleAuthenticator";
     private Context context;
     private ProgressBar progressBar;
 
@@ -43,7 +37,6 @@ public class GoogleAuthenticator extends AsyncTask<GoogleSignInAccount, Void, Vo
 
     @Override
     protected Void doInBackground(GoogleSignInAccount... params) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + params[0].getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(params[0].getIdToken(), null);
         FirebaseAuth.getInstance().signInWithCredential(credential)
@@ -51,7 +44,6 @@ public class GoogleAuthenticator extends AsyncTask<GoogleSignInAccount, Void, Vo
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "signInWithCredential:success");
                             FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                             final DatabaseReference ref = firebaseDatabase.getReference().child("authorised");
                             final DatabaseReference usersRef = ref.child("usersGoogle");
@@ -90,7 +82,6 @@ public class GoogleAuthenticator extends AsyncTask<GoogleSignInAccount, Void, Vo
                             GoogleAuthenticator.this.context.startActivity(new Intent(GoogleAuthenticator.this.context,
                                     UserActivity.class));
                         } else {
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(GoogleAuthenticator.this.context, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                             GoogleAuthenticator.this.progressBar.setVisibility(View.INVISIBLE);

@@ -6,10 +6,6 @@ import android.os.Parcelable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by Karan on 25-07-2017.
- */
-
 public class LocationData implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public LocationData createFromParcel(Parcel in) {
@@ -22,12 +18,12 @@ public class LocationData implements Parcelable {
     };
     @SerializedName("lat")
     @Expose
-    double lat;
+    private double lat;
     @SerializedName("lng")
     @Expose
-    double lng;
+    private double lng;
 
-    public LocationData(Parcel in) {
+    private LocationData(Parcel in) {
 
         this.lat = in.readDouble();
         this.lng = in.readDouble();

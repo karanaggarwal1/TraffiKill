@@ -5,7 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.Activities.UserActivity;
@@ -21,18 +22,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.karan.traffikill.Fragments.UserProfile.TAG;
-
-/**
- * Created by Karan on 27-07-2017.
- */
-
 public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
     private Context context;
     private FirebaseAuth firebaseAuth;
     private String etEmail, etPassword, etName;
     private boolean retval = false;
     private String userName;
+    private ProgressBar progressBar;
 
     @Override
     protected Boolean doInBackground(Void... params) {
@@ -46,9 +42,6 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                if (FirebaseAuth.getInstance().getCurrentUser() == null)
-                                    Log.d(TAG, "onComplete: null");
-                                Log.d("EmailAuthenticator", "signInWithCredential:success");
                                 Toast.makeText(EmailAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
                                 publishProgress(50);
                                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -61,8 +54,6 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                                 userNameReference.setValue(unauthorisedData);
                                 DatabaseReference currentUserReference = usersRef.child(FirebaseAuth.getInstance().
                                         getCurrentUser().getUid());
-                                Log.d(TAG, "onComplete: " + FirebaseAuth.getInstance().
-                                        getCurrentUser().getUid());
                                 Map<String, String> userDetails = new HashMap<>();
                                 userDetails.put("name", EmailAuthenticator.this.etName);
                                 userDetails.put("username", EmailAuthenticator.this.userName);
@@ -72,16 +63,13 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                                 currentUserReference.setValue(userDetails).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Log.d(TAG, "onFailure: " + e.getCause());
-                                        Log.d(TAG, "onFailure: " + e.getStackTrace());
-                                        Log.d(TAG, "onFailure: " + e.getMessage());
-                                        Log.d(TAG, "onFailure: " + e.getLocalizedMessage());
-                                        Log.d(TAG, "onFailure: " + e.getClass());
+                                        Toast.makeText(EmailAuthenticator.this.context, e.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                                 });
                                 retval = true;
                                 publishProgress(90);
-                                firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(
+                                        new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
@@ -89,18 +77,21 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                                                     "Verification Email Sent",
                                                     Toast.LENGTH_SHORT).show();
                                             publishProgress(100);
+                                            progressBar.setVisibility(View.INVISIBLE);
                                         }
                                     }
                                 });
+                                progressBar.setVisibility(View.INVISIBLE);
                             }
                         }
                     });
-
+                    progressBar.setVisibility(View.INVISIBLE);
                     EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserActivity.class));
                 } else if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                     Toast.makeText(EmailAuthenticator.this.context, "User already exists", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.INVISIBLE);
                 } else {
-                    Log.d("EmailAuthenticator", "onComplete: " + task.getException());
+                    progressBar.setVisibility(View.INVISIBLE);
                 }
             }
 
@@ -124,12 +115,13 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
         super.onProgressUpdate(values);
     }
 
-    public void initialise(Context context, String etName, String etEmail, String etPassword, String userName) {
+    public void initialise(Context context, String etName, String etEmail, String etPassword, String userName, ProgressBar progressBar) {
         this.context = context;
         this.etEmail = etEmail;
         this.etPassword = etPassword;
         this.userName = userName;
         this.etName = etName;
         this.firebaseAuth = FirebaseAuth.getInstance();
+        this.progressBar = progressBar;
     }
 }
