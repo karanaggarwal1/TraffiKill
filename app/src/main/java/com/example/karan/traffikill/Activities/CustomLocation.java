@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.Adapters.WeatherItemsAdapter;
@@ -26,31 +29,20 @@ public class CustomLocation extends AppCompatActivity {
     ArrayList<CurrentData> currentList;
     ArrayList<CurrentData> hourlyList;
     WeatherAPI weatherAPI;
+    ProgressBar progressBar;
+    RelativeLayout relativeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_weekly_data);
+        progressBar = (ProgressBar) findViewById(R.id.list_loading);
+        relativeLayout = (RelativeLayout) findViewById(R.id.content_holder);
+        progressBar.setVisibility(View.VISIBLE);
+        relativeLayout.setVisibility(View.GONE);
         currentList = new ArrayList<>();
         hourlyList = new ArrayList<>();
         weatherAPI = new WeatherAPI();
-        weatherAPI.getWeatherClient().getWeatherInfo(getIntent().getDoubleExtra("latitude", 0.0),
-                getIntent().getDoubleExtra("longitude", 0)).enqueue(new Callback<WeatherInfo>() {
-            @Override
-            public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
-                if (response.isSuccessful()) {
-                    currentList.add(response.body().getCurrently());
-                    currentList.addAll(response.body().getHourly().getData());
-                    hourlyList.addAll(response.body().getHourly().getData());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<WeatherInfo> call, Throwable t) {
-                Toast.makeText(CustomLocation.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
-        final NavigationTabStrip navigationTabStrip = (NavigationTabStrip) findViewById(R.id.navTabStrip);
         weatherList = (RecyclerView) findViewById(R.id.weatherCards);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -61,6 +53,46 @@ public class CustomLocation extends AppCompatActivity {
         weatherItemsAdapter.setView(findViewById(R.id.weatherPreview));
         weatherItemsAdapter.updateData(this.currentList, "currently");
         weatherList.setAdapter(weatherItemsAdapter);
+        weatherAPI.getWeatherClient().getWeatherInfo(getIntent().getDoubleExtra("latitude", 0.0),
+                getIntent().getDoubleExtra("longitude", 0)).enqueue(new Callback<WeatherInfo>() {
+            @Override
+            public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
+                if (response.isSuccessful()) {
+                    currentList.add(response.body().getCurrently());
+                    currentList.addAll(response.body().getHourly().getData());
+                    progressBar.setVisibility(View.GONE);
+                    relativeLayout.setVisibility(View.VISIBLE);
+                    weatherList.setAdapter(null);
+                    weatherItemsAdapter.updateData(currentList, "currently");
+                    weatherList.setAdapter(weatherItemsAdapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WeatherInfo> call, Throwable t) {
+                Toast.makeText(CustomLocation.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        weatherAPI.getWeatherClient().getWeatherInfo(getIntent().getDoubleExtra("latitude", 0.0),
+                getIntent().getDoubleExtra("longitude", 0), "hourly").enqueue(new Callback<WeatherInfo>() {
+            @Override
+            public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
+                if (response.isSuccessful()) {
+                    hourlyList.addAll(response.body().getHourly().getData());
+                    progressBar.setVisibility(View.GONE);
+                    relativeLayout.setVisibility(View.VISIBLE);
+                    weatherList.setAdapter(null);
+                    weatherItemsAdapter.updateData(hourlyList, "hourly");
+                    weatherList.setAdapter(weatherItemsAdapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WeatherInfo> call, Throwable t) {
+                Toast.makeText(CustomLocation.this, t.getCause().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        final NavigationTabStrip navigationTabStrip = (NavigationTabStrip) findViewById(R.id.navTabStrip);
         navigationTabStrip.setTitles("TODAY", "THIS WEEK");
         navigationTabStrip.setTabIndex(0, true);
         navigationTabStrip.setTitleSize(35);

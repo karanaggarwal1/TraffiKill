@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import com.example.karan.traffikill.Adapters.WeatherItemsAdapter;
 import com.example.karan.traffikill.R;
@@ -19,12 +21,19 @@ import java.util.ArrayList;
 
 public class WeeklyData extends Fragment {
 
+    static RelativeLayout relativeLayout;
+    static ProgressBar progressBar;
     View rootview;
     ArrayList<CurrentData> hourlyList = new ArrayList<>();
     ArrayList<CurrentData> currentList = new ArrayList<>();
     WeatherItemsAdapter weatherItemsAdapter;
     RecyclerView weatherList;
     Context context;
+
+    public static void activate_view() {
+        progressBar.setVisibility(View.GONE);
+        relativeLayout.setVisibility(View.VISIBLE);
+    }
 
     public void setContext(Context context) {
         this.context = context;
@@ -36,6 +45,8 @@ public class WeeklyData extends Fragment {
         final NavigationTabStrip navigationTabStrip = (NavigationTabStrip) rootview.findViewById(R.id.navTabStrip);
         weatherList = (RecyclerView) rootview.findViewById(R.id.weatherCards);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        relativeLayout = (RelativeLayout) rootview.findViewById(R.id.content_holder);
+        progressBar = (ProgressBar) rootview.findViewById(R.id.list_loading);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         weatherList.setLayoutManager(linearLayoutManager);
         weatherItemsAdapter = new WeatherItemsAdapter(this.context);
@@ -83,8 +94,14 @@ public class WeeklyData extends Fragment {
         if (weatherItemsAdapter != null) {
             if (type.equals("currently")) {
                 this.currentList = mCurrentData;
+                weatherList.setAdapter(null);
+                weatherItemsAdapter.updateData(this.currentList, "currently");
+                weatherList.setAdapter(weatherItemsAdapter);
             } else {
                 this.hourlyList = mCurrentData;
+                weatherList.setAdapter(null);
+                weatherItemsAdapter.updateData(this.hourlyList, "hourly");
+                weatherList.setAdapter(weatherItemsAdapter);
             }
         }
     }

@@ -14,81 +14,95 @@
         android:layout_weight="6.2"
         android:visibility="invisible">
 
-        <com.example.karan.traffikill.CustomViews.CustomTextView
-            android:id="@+id/tvTempBig"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="37dp"
-            android:text="36°C"
-            android:textColor="@color/colorWhite"
-            android:textSize="23sp" />
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/list_loading"
+            android:visibility="visible" />
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:layout_below="@+id/tvTempBig"
-            android:layout_marginTop="19dp"
-            android:layout_toLeftOf="@+id/tvSummary"
-            android:layout_toStartOf="@+id/tvSummary"
-            app:srcCompat="@drawable/cloudy_icon" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:id="@+id/content_holder">
 
-        <com.example.karan.traffikill.CustomViews.CustomTextView
-            android:id="@+id/tvSummary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/imageView"
-            android:layout_alignLeft="@+id/tvTempBig"
-            android:layout_alignStart="@+id/tvTempBig"
-            android:layout_marginBottom="11dp"
-            android:layout_marginLeft="29dp"
-            android:layout_marginStart="29dp"
-            android:text="Partly Cloudy"
-            android:textColor="@color/colorWhite"
-            android:textSize="18sp" />
+            <com.example.karan.traffikill.CustomViews.CustomTextView
+                android:id="@+id/tvTempBig"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="37dp"
+                android:text="36°C"
+                android:textColor="@color/colorWhite"
+                android:textSize="23sp" />
 
-        <com.example.karan.traffikill.CustomViews.CustomTextView
-            android:id="@+id/tvTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:text="01:07 AM"
-            android:textColor="@color/colorWhite" />
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_below="@+id/tvTempBig"
+                android:layout_marginTop="19dp"
+                android:layout_toLeftOf="@+id/tvSummary"
+                android:layout_toStartOf="@+id/tvSummary"
+                app:srcCompat="@drawable/cloudy_icon" />
 
-        <com.example.karan.traffikill.CustomViews.CustomTextView
-            android:id="@+id/tvProbability"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvTime"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="22dp"
-            android:text="14% chance of getting stuck in traffic."
-            android:textColor="@color/colorWhite"
-            android:textSize="16sp" />
+            <com.example.karan.traffikill.CustomViews.CustomTextView
+                android:id="@+id/tvSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/imageView"
+                android:layout_alignLeft="@+id/tvTempBig"
+                android:layout_alignStart="@+id/tvTempBig"
+                android:layout_marginBottom="11dp"
+                android:layout_marginLeft="29dp"
+                android:layout_marginStart="29dp"
+                android:text="Partly Cloudy"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
 
-        <com.example.karan.traffikill.CustomViews.CustomTextView
-            android:id="@+id/tvHumidity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvProbability"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="19dp"
-            android:text="Humidity = 16%"
-            android:textColor="@color/colorWhite" />
+            <com.example.karan.traffikill.CustomViews.CustomTextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:text="01:07 AM"
+                android:textColor="@color/colorWhite" />
 
-        <com.example.karan.traffikill.CustomViews.CustomTextView
-            android:id="@+id/tvPrecipIntensity"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tvHumidity"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="24dp"
-            android:text="Precipitation Intensity = 0.002"
-            android:textAlignment="center"
-            android:textColor="@color/colorWhite" />
+            <com.example.karan.traffikill.CustomViews.CustomTextView
+                android:id="@+id/tvProbability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvTime"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="22dp"
+                android:text="14% chance of getting stuck in traffic."
+                android:textColor="@color/colorWhite"
+                android:textSize="16sp" />
+
+            <com.example.karan.traffikill.CustomViews.CustomTextView
+                android:id="@+id/tvHumidity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvProbability"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="19dp"
+                android:text="Humidity = 16%"
+                android:textColor="@color/colorWhite" />
+
+            <com.example.karan.traffikill.CustomViews.CustomTextView
+                android:id="@+id/tvPrecipIntensity"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvHumidity"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="24dp"
+                android:text="Precipitation Intensity = 0.002"
+                android:textAlignment="center"
+                android:textColor="@color/colorWhite" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

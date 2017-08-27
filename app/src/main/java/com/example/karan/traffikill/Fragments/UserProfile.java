@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -117,8 +118,7 @@ public class UserProfile extends Fragment {
         storageReference = FirebaseStorage.getInstance().getReference();
         rootview = inflater.inflate(R.layout.fragment_user_profile, container, false);
         rootview.setClickable(true);
-        rootview.findViewById(R.id.changeLocation);
-        rootview.setOnClickListener(new View.OnClickListener() {
+        rootview.findViewById(R.id.changeLocation).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
@@ -219,6 +219,7 @@ public class UserProfile extends Fragment {
                         child("authorised").
                         child("usersEmail").
                         child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                Log.d(TAG, "onCreateView: " + FirebaseAuth.getInstance().getCurrentUser().getUid());
                 databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {

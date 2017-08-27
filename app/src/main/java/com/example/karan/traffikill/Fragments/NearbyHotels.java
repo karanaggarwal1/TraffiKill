@@ -9,6 +9,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.example.karan.traffikill.Adapters.NearbyHotelsAdapter;
 import com.example.karan.traffikill.R;
@@ -17,10 +18,16 @@ import com.example.karan.traffikill.models.ResultData;
 import java.util.ArrayList;
 
 public class NearbyHotels extends Fragment {
+    static RecyclerView hotels;
+    static ProgressBar progressBar;
     ArrayList<ResultData> hotelList = new ArrayList<>();
     NearbyHotelsAdapter nearbyPlaceAdapter;
-    RecyclerView hotels;
     Context context;
+
+    public static void activate_list() {
+        hotels.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+    }
 
     public void setContext(Context context) {
         this.context = context;
@@ -65,6 +72,7 @@ public class NearbyHotels extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         hotels = (RecyclerView) view.findViewById(R.id.rv_hotels);
+        progressBar = (ProgressBar) view.findViewById(R.id.list_loading);
         hotels.setHasFixedSize(true);
         StaggeredGridLayoutManager gaggeredGridLayoutManager = new StaggeredGridLayoutManager(2, 1);
         hotels.setLayoutManager(gaggeredGridLayoutManager);

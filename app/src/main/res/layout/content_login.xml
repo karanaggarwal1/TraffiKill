@@ -1,123 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorWhite"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical"
-    android:id="@+id/content_login">
+    android:layout_height="match_parent">
 
-
-    <LinearLayout
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/content_login"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:background="@color/colorWhite"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        android:scrollbars="vertical">
+
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="30dp"
-            android:layout_marginLeft="40dp"
-
-            android:layout_marginRight="40dp"
-            android:layout_marginTop="40dp"
-            android:gravity="center"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal"
-                android:weightSum="2">
+                android:layout_gravity="center"
+                android:layout_marginBottom="30dp"
+                android:layout_marginLeft="40dp"
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1.75"
-                    android:src="@mipmap/user" />
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="25dp"
+                android:gravity="center"
+                android:orientation="vertical">
 
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/User"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="0.25">
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
-                    <com.example.karan.traffikill.CustomViews.CustomEditText
-                        android:id="@+id/tvUsername"
+                    <ImageView
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="40dp"
                         android:layout_gravity="center"
-                        android:hint="Email Address"
-                        android:inputType="textEmailAddress"
-                        android:textColorHint="#c6c6c6" />
+                        android:layout_weight="1.75"
+                        android:src="@mipmap/user" />
 
-                </android.support.design.widget.TextInputLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:layout_weight="1.75"
-                    android:src="@mipmap/password" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/Password"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="0.25">
-
-                    <com.example.karan.traffikill.CustomViews.CustomEditText
-                        android:id="@+id/tvPassword"
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/User"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:hint="Password"
-                        android:inputType="textPassword"
-                        android:textColorHint="#c6c6c6" />
+                        android:layout_weight="0.25">
 
-                </android.support.design.widget.TextInputLayout>
+                        <com.example.karan.traffikill.CustomViews.CustomEditText
+                            android:id="@+id/tvUsername"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:hint="Email Address"
+                            android:inputType="textEmailAddress"
+                            android:textColorHint="#c6c6c6" />
 
-            </LinearLayout>
+                    </android.support.design.widget.TextInputLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_gravity="center"
+                        android:layout_weight="1.75"
+                        android:src="@mipmap/password" />
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/Password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="0.25">
+
+                        <com.example.karan.traffikill.CustomViews.CustomEditText
+                            android:id="@+id/tvPassword"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:hint="Password"
+                            android:inputType="textPassword"
+                            android:textColorHint="#c6c6c6" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                </LinearLayout>
 
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
-                android:orientation="horizontal"
-                android:padding="5dp"
-                android:weightSum="4">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:padding="5dp"
+                    android:weightSum="4">
 
-                <ImageView
-                    android:id="@+id/fbLoginButton"
-                    android:layout_width="10dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="1.40"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:src="@drawable/facebook" />
+                    <ImageView
+                        android:id="@+id/fbLoginButton"
+                        android:layout_width="10dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="4"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:src="@drawable/facebook" />
+                </LinearLayout>
 
                 <ProgressBar
                     android:id="@+id/determinateBar"
-                    android:paddingTop="35dp"
                     style="@android:style/Widget.ProgressBar.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1.2"
+                    android:paddingTop="10dp"
                     android:progress="0"
                     android:visibility="invisible" />
 
@@ -125,47 +130,46 @@
                     android:id="@+id/btnGoogleSignIn"
                     android:layout_width="10dp"
                     android:layout_height="60dp"
-                    android:layout_weight="1.40"
-                    android:src="@drawable/googleplus" />
+                    android:src="@drawable/googleplus"
+                    android:visibility="gone" />
 
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:orientation="horizontal"
-                android:weightSum="2">
-
-                <Button
-                    android:id="@+id/btnSignIn"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#b485d8"
-                    android:padding="20dp"
-                    android:text="SIGN IN "
-                    android:textColor="#fff"
-                    android:textSize="20dp" />
-            </LinearLayout>
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="vertical">
+                    <Button
+                        android:id="@+id/btnSignIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="#b485d8"
+                        android:padding="20dp"
+                        android:text="SIGN IN "
+                        android:textColor="#fff"
+                        android:textSize="20dp" />
+                </LinearLayout>
 
-                <com.example.karan.traffikill.CustomViews.CustomTextView
-                    android:id="@+id/tvForgotPassword"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="Forgot your password? "
-                    android:textSize="16dp" />
-            </LinearLayout>
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical">
 
+                    <com.example.karan.traffikill.CustomViews.CustomTextView
+                        android:id="@+id/tvForgotPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textColor="@android:color/black"
+                        android:text="Forgot your password? "
+                        android:textSize="16dp" />
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
 
-</android.support.v7.widget.CardView>
+    </android.support.v7.widget.CardView>
+</ScrollView>

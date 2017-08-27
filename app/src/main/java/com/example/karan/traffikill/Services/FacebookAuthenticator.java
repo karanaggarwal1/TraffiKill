@@ -99,8 +99,6 @@ public class FacebookAuthenticator extends AsyncTask<AccessToken, Integer, Boole
                                             usersRef.child(firebaseAuth.getCurrentUser().getUid()).setValue(userDetails);
                                             retval = true;
                                             publishProgress(100);
-
-
                                         }
                                         @Override
                                         public void onCancelled(DatabaseError databaseError) {

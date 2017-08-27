@@ -128,6 +128,8 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                             setText(WeatherItemsAdapter.this.currentList.get(x).getTemperature() + " °C");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvSummary))).
                             setText(WeatherItemsAdapter.this.currentList.get(x).getSummary());
+                    format = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+                    format.setTimeZone(TimeZone.getDefault());
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTime))).
                             setText(format.format(new Date(Long.parseLong(WeatherItemsAdapter.
                                     this.currentList.get(x).getTime()) * 1000L)));
@@ -136,9 +138,11 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                                     this.currentList.get(x).getPrecipProbability()) * 10000.0) / 100.0 + "" +
                                     "% likely to get stuck in traffic");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvHumidity))).
-                            setText("Humidity = " + Math.round(Double.parseDouble(WeatherItemsAdapter.this.currentList.get(x).getHumidity()) * 10000.0) / 100.0 + "%");
+                            setText("Humidity = " + Math.round(Double.parseDouble(WeatherItemsAdapter.this.currentList.get
+                                    (x).getHumidity()) * 10000.0) / 100.0 + "%");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvPrecipIntensity))).
-                            setText("It might rain as intense as " + WeatherItemsAdapter.this.currentList.get(x).getPrecipIntensity() + " inches of water per hour ");
+                            setText("It might rain as intense as " + WeatherItemsAdapter.this.currentList.get
+                                    (x).getPrecipIntensity() + " inches of water per hour ");
                 }
             });
             if (position == 0) {
@@ -189,6 +193,8 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                             setText(WeatherItemsAdapter.this.hourlyList.get(x).getTemperature() + "°C");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvSummary))).
                             setText(WeatherItemsAdapter.this.hourlyList.get(x).getSummary());
+                    format = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+                    format.setTimeZone(TimeZone.getDefault());
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvTime))).
                             setText(format.format(new Date(Long.parseLong(WeatherItemsAdapter.
                                     this.hourlyList.get(x).getTime()) * 1000L)));
@@ -197,7 +203,8 @@ public class WeatherItemsAdapter extends RecyclerView.Adapter<WeatherItemsAdapte
                                     this.hourlyList.get(x).getPrecipProbability()) * 10000.0) / 100.0 + "" +
                                     "% likely to get stuck in traffic");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvHumidity))).
-                            setText("Humidity = " + Math.round(Double.parseDouble(WeatherItemsAdapter.this.hourlyList.get(x).
+                            setText("Humidity = " + Math.round(Double.parseDouble(WeatherItemsAdapter.this.hourlyList.get
+                                    (x).
                                     getHumidity()) * 10000.0) / 100.0 + "%");
                     ((TextView) (WeatherItemsAdapter.this.view.findViewById(R.id.tvPrecipIntensity))).
                             setText("It might rain as intense as " + WeatherItemsAdapter.this.hourlyList.get(x).getPrecipIntensity()

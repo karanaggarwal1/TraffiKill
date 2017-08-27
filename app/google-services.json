@@ -10,16 +10,16 @@
       "client_info": {
         "mobilesdk_app_id": "1:755576237988:android:ee03900122398e4b",
         "android_client_info": {
-          "package_name": "com.example.karan.traffikill"
+          "package_name": "com.karan.traffikill"
         }
       },
       "oauth_client": [
         {
-          "client_id": "755576237988-qakki1jrq379k951njdfjti8jlfg69cf.apps.googleusercontent.com",
+          "client_id": "755576237988-rh73bsi6mhko1dho9vfljp9e4tqo1arv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.karan.traffikill",
-            "certificate_hash": "5c3df061fa4c5b5d0bb555f4b4a1285a5fb739c3"
+            "package_name": "com.karan.traffikill",
+            "certificate_hash": "d7ab055ab03b6758a8cecf6678211d26893df32a"
           }
         },
         {

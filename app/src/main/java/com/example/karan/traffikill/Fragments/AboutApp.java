@@ -42,12 +42,11 @@ public class AboutApp extends Fragment {
                     .setDescription(description)
                     .addItem(getVersionInformation())
                     .addItem(getDarkSkyElement())
-                    .addItem(getGooglePlacesElement())
                     .addItem(getFutureVersions())
                     .addGroup("Connect with us")
                     .addEmail("traffikill.developer@gmail.com")
                     .addFacebook("TraffiKill")
-                    .addPlayStore("com.example.karan.traffikill")
+                    .addPlayStore("com.karan.traffikill")
                     .addGitHub("karanaggarwal1/TraffiKill")
                     .create();
         }
@@ -64,13 +63,13 @@ public class AboutApp extends Fragment {
     private Element getGooglePlacesElement() {
         Element googlePlacesElement = new Element();
         googlePlacesElement.setTitle("Powered by Google");
-        googlePlacesElement.setIconDrawable(R.drawable.sponsor_powered_by_google);
+        googlePlacesElement.setIconDrawable(R.drawable.google_logo);
         return googlePlacesElement;
     }
 
     private Element getVersionInformation() {
         Element versionElement = new Element();
-        versionElement.setTitle("Version 1.0.1");
+        versionElement.setTitle("Version 1.0.8");
         return versionElement;
     }
 

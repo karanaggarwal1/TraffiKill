@@ -7,5 +7,12 @@
         android:id="@+id/rv_hotels"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/list_loading"
+        android:visibility="visible" />
 </LinearLayout>

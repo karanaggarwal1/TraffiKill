@@ -14,51 +14,51 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.R;
 import com.example.karan.traffikill.Services.EmailAuthenticator;
 import com.example.karan.traffikill.Services.FacebookAuthenticator;
-import com.example.karan.traffikill.Services.GoogleAuthenticator;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.truizlop.fabreveallayout.FABRevealLayout;
 import com.truizlop.fabreveallayout.OnRevealChangeListener;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
-    private static final int RC_SIGN_IN = 234;
     private final int PERM_REQ_CODE = 123;
     CallbackManager callbackManager;
     ImageView fbloginButton, cancel;
     Button btnSignIn, btnGetStarted;
     FABRevealLayout btnSignUp;
+    TextView tvForgotPassword;
     EditText etUsername, etPassword, etEmail, etSignUpUsername, etSignUpPassword, etConfirmPassword;
     ProgressBar progressBar;
     EmailAuthenticator emailAuthenticator;
     EditText etName;
-    private ImageView googleLoginButton;
-    private GoogleApiClient mGoogleApiClient;
+    private boolean flag = true;
 
     public static boolean isValidEmail(CharSequence target) {
         return target != null && Patterns.EMAIL_ADDRESS.matcher(target).matches();
@@ -72,8 +72,9 @@ public class LoginActivity extends AppCompatActivity {
         checkPermission(this, Manifest.permission.INTERNET);
 
         cancel = (ImageView) findViewById(R.id.cancel);
-
+        cancel.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         btnSignUp = (FABRevealLayout) findViewById(R.id.fab_reveal_layout);
+
         configureFABReveal(btnSignUp);
 
         cancel.setOnClickListener(new View.OnClickListener() {
@@ -108,7 +109,7 @@ public class LoginActivity extends AppCompatActivity {
         progressBar = (ProgressBar) mainView.findViewById(R.id.determinateBar);
         btnSignIn = (Button) mainView.findViewById(R.id.btnSignIn);
         fbloginButton = (ImageView) mainView.findViewById(R.id.fbLoginButton);
-        googleLoginButton = (ImageView) mainView.findViewById(R.id.btnGoogleSignIn);
+        tvForgotPassword = (TextView) mainView.findViewById(R.id.tvForgotPassword);
         progressBar.setVisibility(View.INVISIBLE);
         btnSignIn.setClickable(true);
         btnSignIn.setOnClickListener(new View.OnClickListener() {
@@ -118,6 +119,8 @@ public class LoginActivity extends AppCompatActivity {
                 if (UserActivity.userAuthentication.getCurrentUser() != null) {
                     UserActivity.userAuthentication.signOut();
                     LoginManager.getInstance().logOut();
+                    if (!login_checker())
+                        return;
                     UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
                             etPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
@@ -129,13 +132,18 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString(),
+                    if (!login_checker())
+                        return;
+                    UserActivity.userAuthentication.signInWithEmailAndPassword(etUsername.getText().toString().trim(),
                             etPassword.getText().toString()).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 progressBar.setVisibility(View.INVISIBLE);
                                 startActivity(new Intent(LoginActivity.this, UserActivity.class));
+                            } else {
+                                Toast.makeText(LoginActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                progressBar.setVisibility(View.INVISIBLE);
                             }
                         }
                     });
@@ -172,32 +180,40 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         });
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestIdToken(getString(R.string.google_sign_in_id))
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Toast.makeText(LoginActivity.this, connectionResult.getErrorMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        googleLoginButton.setOnClickListener(new View.OnClickListener() {
+        tvForgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                signIn();
+                if (etUsername.getText().toString().equals("") || !isValidEmail(etUsername.getText().toString().trim())) {
+                    Toast.makeText(LoginActivity.this, "Invalid Email Address", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                UserActivity.userAuthentication.sendPasswordResetEmail(LoginActivity.this.etUsername.getText().toString()).
+                        addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(LoginActivity.this, "Reset Email sent", Toast.LENGTH_SHORT).show();
+                                } else if (task.getException() instanceof FirebaseAuthInvalidUserException) {
+                                    Toast.makeText(LoginActivity.this, "User doesn't exist", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
             }
         });
     }
 
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+    private boolean login_checker() {
+        if (etUsername.getText().toString().trim().equals("") || etPassword.getText().toString().trim().equals("")) {
+            Toast.makeText(LoginActivity.this, "Email or Password can't be empty", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
+            return false;
+        }
+        if (!isValidEmail(etUsername.getText().toString().trim())) {
+            Toast.makeText(LoginActivity.this, "Invalid Email Address", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.INVISIBLE);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -302,17 +318,52 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Invalid Email Address", Toast.LENGTH_SHORT).show();
                             return;
                         }
+                        if (etSignUpPassword.getText().toString().length() < 6) {
+                            Toast.makeText(LoginActivity.this, "Password Length should be greater than 6 characters",
+                                    Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         if (!etSignUpPassword.getText().toString().equals(etConfirmPassword.getText().toString())) {
                             Toast.makeText(LoginActivity.this, "Passwords Do Not Match!", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        if (!isValidUsername(etUsername.getText().toString().trim())) {
+                        if (isValidUsername(etSignUpUsername.getText().toString().trim()) == false) {
 //                            '/', '.', '#', '$', '[', or ']
                             Toast.makeText(LoginActivity.this, "Username can not contain any of the following: '/', '.' , '#' ," +
                                             " '$' , '[' , ']' , ' ' ",
                                     Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                        if (etSignUpPassword.getText().toString().equals(etConfirmPassword.getText().toString())) {
+                        if (etSignUpUsername.getText().toString().equals("") || etSignUpPassword.getText().toString().equals("")) {
+                            Toast.makeText(LoginActivity.this, "Username or Password can't be empty", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        FirebaseDatabase.getInstance().getReference().child("unauthorised").child("usernames").
+                                addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        Log.d("Hello", "onDataChange: " + ((HashMap<String, String>) dataSnapshot.getValue()).size());
+                                        if (((HashMap<Object, Object>) dataSnapshot.getValue()).containsKey(
+                                                etSignUpUsername.getText().toString().trim())) {
+                                            Toast.makeText(LoginActivity.this, "Username Already Exists", Toast.LENGTH_SHORT).show();
+                                            flag = false;
+                                            return;
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        Toast.makeText(LoginActivity.this, databaseError.getMessage().toString(), Toast.LENGTH_SHORT)
+                                                .show();
+                                        flag = false;
+                                        return;
+                                    }
+                                });
+                        if (!flag) {
+                            btnGetStarted.setClickable(true);
+                            return;
+                        }
+                        if (etSignUpPassword.getText().toString().equals(etConfirmPassword.getText().toString()) && flag) {
                             emailAuthenticator.initialise(LoginActivity.this,
                                     etName.getText().toString(),
                                     etEmail.getText().toString(),
@@ -321,12 +372,10 @@ public class LoginActivity extends AppCompatActivity {
                                     progressBar);
                             progressBar.setVisibility(View.VISIBLE);
                             emailAuthenticator.execute();
-
                             btnGetStarted.setClickable(false);
                         }
                     }
                 });
-
             }
         });
     }
@@ -342,24 +391,13 @@ public class LoginActivity extends AppCompatActivity {
             public void run() {
                 fabRevealLayout.revealMainView();
             }
-        }, 2000);
+        }, 300);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                GoogleSignInAccount account = result.getSignInAccount();
-                GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
-                googleAuthenticator.initializor(LoginActivity.this, LoginActivity.this.progressBar);
-                googleAuthenticator.execute(account);
-            } else {
-                Toast.makeText(LoginActivity.this, result.getStatus().toString(), Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
 

@@ -14,9 +14,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.karan.traffikill.Adapters.NavigationTabAdapter;
@@ -89,14 +89,11 @@ public class UserActivity extends AppCompatActivity {
     private LocationRequest locationRequest;
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
-//    private String x;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-        checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        checkPermission(this, Manifest.permission.INTERNET);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //noinspection ResourceAsColor
             this.getWindow().setStatusBarColor(R.color.transparent);
@@ -110,8 +107,10 @@ public class UserActivity extends AppCompatActivity {
             startActivity(loginScreen);
             finish();
         }
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime >= 3000) ;
+        checkPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         initUI();
-
         UserActivity.mDailyData = new ArrayList<>();
         UserActivity.mHourlyData = new ArrayList<>();
         UserActivity.mCurrentData = new ArrayList<>();
@@ -119,9 +118,9 @@ public class UserActivity extends AppCompatActivity {
         UserActivity.nearbyHotelList = new ArrayList<>();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
-        createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+        createLocationCallback();
     }
 
     private void getNearbyPlaces(String type) {
@@ -132,7 +131,7 @@ public class UserActivity extends AppCompatActivity {
         nearbyPlacesAPI.getNearbyPlacesClient().getNearbyPlaces(
                 location,
                 type,
-                50000)
+                5000)
                 .enqueue(new Callback<NearbyPlaces>() {
                     @Override
                     public void onResponse(Call<NearbyPlaces> call, Response<NearbyPlaces> response) {
@@ -141,14 +140,17 @@ public class UserActivity extends AppCompatActivity {
                                 case "restaurant":
                                     UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
                                     UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
+                                    NearbyRestaurants.activate_list();
                                     break;
                                 case "lodging":
                                     UserActivity.nearbyHotelList.addAll(response.body().getResults());
                                     UserActivity.this.nearbyHotels.updateList(UserActivity.nearbyHotelList);
+                                    NearbyHotels.activate_list();
                                     break;
                                 default:
                                     UserActivity.nearbyRestaurantList.addAll(response.body().getResults());
                                     UserActivity.this.nearbyRestaurants.updateList(UserActivity.nearbyRestaurantList);
+                                    NearbyRestaurants.activate_list();
                             }
                         }
 
@@ -178,6 +180,7 @@ public class UserActivity extends AppCompatActivity {
                                 UserActivity.mCurrentData.add(response.body().getCurrently());
                                 UserActivity.mCurrentData.addAll(response.body().getHourly().getData());
                                 weeklyData.updateList(UserActivity.mCurrentData, "currently");
+                                WeeklyData.activate_view();
                             }
 
                             @Override
@@ -194,8 +197,9 @@ public class UserActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
                                 if (response.isSuccessful()) {
-                                    UserActivity.this.mHourlyData.addAll(response.body().getHourly().data);
-                                    weeklyData.updateList(UserActivity.this.mCurrentData, "hourly");
+                                    UserActivity.this.mHourlyData.addAll(response.body().getHourly().getData());
+                                    weeklyData.updateList(UserActivity.this.mHourlyData, "hourly");
+                                    WeeklyData.activate_view();
                                 }
                             }
 
@@ -240,8 +244,6 @@ public class UserActivity extends AppCompatActivity {
         super.onResume();
         if (checkPermissions()) {
             startLocationUpdates();
-        } else if (!checkPermissions()) {
-            Toast.makeText(this, "Enable Permissions for Location Services", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -303,12 +305,18 @@ public class UserActivity extends AppCompatActivity {
 
     public void checkPermission(Context context, String perm) {
 
-        if (ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
+        if (ActivityCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions((Activity) context, new String[]{perm}, PERM_REQ_CODE);
         }
+        Log.d("test", "checkPermission: ");
         if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context, perm)) {
             Toast.makeText(context, "Give the permission please.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

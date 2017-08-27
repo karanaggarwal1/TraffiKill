@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -38,55 +39,68 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    firebaseAuth.signInWithEmailAndPassword(etEmail, etPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(EmailAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
-                                publishProgress(50);
-                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                                DatabaseReference ref = firebaseDatabase.getReference().child("authorised");
-                                DatabaseReference userNameReference = firebaseDatabase.getReference().
-                                        child("unauthorised").child("usernames");
-                                DatabaseReference usersRef = ref.child("usersEmail");
-                                Map<String, String> unauthorisedData = new HashMap<>();
-                                unauthorisedData.put(EmailAuthenticator.this.userName, EmailAuthenticator.this.etEmail);
-                                userNameReference.setValue(unauthorisedData);
-                                DatabaseReference currentUserReference = usersRef.child(FirebaseAuth.getInstance().
-                                        getCurrentUser().getUid());
-                                Map<String, String> userDetails = new HashMap<>();
-                                userDetails.put("name", EmailAuthenticator.this.etName);
-                                userDetails.put("username", EmailAuthenticator.this.userName);
-                                userDetails.put("email", EmailAuthenticator.this.etEmail);
-                                userDetails.put("verified", "false");
-                                userDetails.put("pictureSet", "false");
-                                currentUserReference.setValue(userDetails).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(EmailAuthenticator.this.context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    firebaseAuth.signInWithEmailAndPassword(etEmail, etPassword)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(EmailAuthenticator.this.context, "Login Successful", Toast.LENGTH_SHORT).show();
+                                        publishProgress(50);
+                                        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                        DatabaseReference ref = firebaseDatabase.getReference().child("authorised");
+                                        DatabaseReference userNameReference = firebaseDatabase.getReference().
+                                                child("unauthorised").child("usernames");
+                                        DatabaseReference usersRef = ref.child("usersEmail");
+                                        Map<String, String> unauthorisedData = new HashMap<>();
+                                        unauthorisedData.put(EmailAuthenticator.this.userName, EmailAuthenticator.this.etEmail);
+                                        userNameReference.setValue(unauthorisedData).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.d("failures", "onFailure: " + e.getMessage());
+                                            }
+                                        });
+                                        DatabaseReference currentUserReference = usersRef.child(FirebaseAuth.getInstance().
+                                                getCurrentUser().getUid());
+                                        Map<String, String> userDetails = new HashMap<>();
+                                        userDetails.put("name", EmailAuthenticator.this.etName);
+                                        userDetails.put("username", EmailAuthenticator.this.userName);
+                                        userDetails.put("email", EmailAuthenticator.this.etEmail);
+                                        userDetails.put("verified", "false");
+                                        userDetails.put("pictureSet", "false");
+                                        currentUserReference.setValue(userDetails).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(EmailAuthenticator.this.context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        }).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    retval = true;
+                                                    publishProgress(90);
+                                                    firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(
+                                                            new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        Toast.makeText(EmailAuthenticator.this.context,
+                                                                                "Verification Email Sent",
+                                                                                Toast.LENGTH_SHORT).show();
+                                                                        publishProgress(100);
+                                                                        progressBar.setVisibility(View.INVISIBLE);
+                                                                    }
+                                                                }
+                                                            });
+                                                    progressBar.setVisibility(View.INVISIBLE);
+                                                }
+                                            }
+                                        });
+                                        progressBar.setVisibility(View.INVISIBLE);
+                                        EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserActivity.class));
                                     }
-                                });
-                                retval = true;
-                                publishProgress(90);
-                                firebaseAuth.getCurrentUser().sendEmailVerification().addOnCompleteListener(
-                                        new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Toast.makeText(EmailAuthenticator.this.context,
-                                                    "Verification Email Sent",
-                                                    Toast.LENGTH_SHORT).show();
-                                            publishProgress(100);
-                                            progressBar.setVisibility(View.INVISIBLE);
-                                        }
-                                    }
-                                });
-                                progressBar.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    });
-                    progressBar.setVisibility(View.INVISIBLE);
-                    EmailAuthenticator.this.context.startActivity(new Intent(EmailAuthenticator.this.context, UserActivity.class));
+                                }
+                            });
+
                 } else if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                     Toast.makeText(EmailAuthenticator.this.context, "User already exists", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.INVISIBLE);
@@ -95,6 +109,11 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
                 }
             }
 
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
         return retval;
     }
@@ -117,7 +136,7 @@ public class EmailAuthenticator extends AsyncTask<Void, Integer, Boolean> {
 
     public void initialise(Context context, String etName, String etEmail, String etPassword, String userName, ProgressBar progressBar) {
         this.context = context;
-        this.etEmail = etEmail;
+        this.etEmail = etEmail.toLowerCase();
         this.etPassword = etPassword;
         this.userName = userName;
         this.etName = etName;
